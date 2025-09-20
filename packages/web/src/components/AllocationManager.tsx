@@ -242,7 +242,6 @@ function AllocationForm({
 
     try {
       await createAllocation.mutateAsync({
-        portfolioId,
         assetId: selectedAsset.id,
         targetPercentage: parseFloat(targetPercentage),
       });
@@ -388,7 +387,6 @@ function EditAllocationForm({
       try {
         await deleteAllocation.mutateAsync({
           id: allocation.id,
-          portfolioId: allocation.portfolioId,
         });
         onSuccess();
       } catch (error) {

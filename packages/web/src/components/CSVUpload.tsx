@@ -15,9 +15,7 @@ interface CSVRow {
   type: TransactionType;
   quantity: number;
   price: number;
-  fee?: number;
   executedAt: string;
-  notes?: string;
 }
 
 export function CSVUpload({ portfolioId, onSuccess, onCancel }: CSVUploadProps) {
@@ -62,9 +60,7 @@ export function CSVUpload({ portfolioId, onSuccess, onCancel }: CSVUploadProps) 
           type: validateTransactionType(row.type),
           quantity: parseFloat(row.quantity),
           price: parseFloat(row.price),
-          fee: row.fee ? parseFloat(row.fee) : 0,
           executedAt: new Date(row.date).toISOString(),
-          notes: row.notes || undefined,
         };
 
         // Validate parsed values
@@ -90,7 +86,7 @@ export function CSVUpload({ portfolioId, onSuccess, onCancel }: CSVUploadProps) 
   };
 
   const validateTransactionType = (type: string): TransactionType => {
-    const validTypes: TransactionType[] = ['buy', 'sell', 'dividend', 'fee'];
+    const validTypes: TransactionType[] = ['buy', 'sell'];
     const normalizedType = type.toLowerCase() as TransactionType;
 
     if (!validTypes.includes(normalizedType)) {
@@ -158,7 +154,7 @@ export function CSVUpload({ portfolioId, onSuccess, onCancel }: CSVUploadProps) 
       }
 
       // Create transactions with resolved asset IDs
-      const transactions: CreateTransaction[] = preview
+      const transactions: (CreateTransaction & { portfolioId: string })[] = preview
         .filter((row) => assetMap.has(row.symbol))
         .map((row) => ({
           portfolioId,
@@ -166,10 +162,7 @@ export function CSVUpload({ portfolioId, onSuccess, onCancel }: CSVUploadProps) 
           type: row.type,
           quantity: row.quantity,
           price: row.price,
-          fee: row.fee || 0,
-          currency: 'USD',
           executedAt: new Date(row.executedAt),
-          notes: row.notes,
         }));
 
       if (transactions.length === 0) {
@@ -215,10 +208,10 @@ export function CSVUpload({ portfolioId, onSuccess, onCancel }: CSVUploadProps) 
       <div className="bg-gray-50 p-4 rounded-md">
         <p className="text-sm font-medium text-gray-700 mb-2">Example CSV format:</p>
         <pre className="text-xs text-gray-600 overflow-x-auto">
-          {`symbol,type,quantity,price,date,fee,notes
-AAPL,buy,10,150.50,2024-01-15,0.99,Initial purchase
-MSFT,buy,5,380.00,2024-01-20,0.99,
-AAPL,sell,5,160.00,2024-02-01,0.99,Taking profits`}
+          {`symbol,type,quantity,price,date
+AAPL,buy,10,150.50,2024-01-15
+MSFT,buy,5,380.00,2024-01-20
+AAPL,sell,5,160.00,2024-02-01`}
         </pre>
       </div>
 
@@ -256,14 +249,8 @@ AAPL,sell,5,160.00,2024-02-01,0.99,Taking profits`}
                   <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
                     Price
                   </th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                    Fee
-                  </th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                     Date
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                    Notes
                   </th>
                 </tr>
               </thead>
@@ -274,14 +261,8 @@ AAPL,sell,5,160.00,2024-02-01,0.99,Taking profits`}
                     <td className="px-3 py-2 text-gray-900">{row.type}</td>
                     <td className="px-3 py-2 text-right text-gray-900">{row.quantity}</td>
                     <td className="px-3 py-2 text-right text-gray-900">${row.price.toFixed(2)}</td>
-                    <td className="px-3 py-2 text-right text-gray-900">
-                      ${row.fee?.toFixed(2) || '0.00'}
-                    </td>
                     <td className="px-3 py-2 text-gray-900">
                       {new Date(row.executedAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-3 py-2 text-gray-500 truncate max-w-xs">
-                      {row.notes || '-'}
                     </td>
                   </tr>
                 ))}

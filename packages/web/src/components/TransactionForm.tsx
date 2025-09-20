@@ -18,9 +18,7 @@ export function TransactionForm({ portfolioId, onSuccess, onCancel }: Transactio
     type: 'buy' as TransactionType,
     quantity: '',
     price: '',
-    fee: '',
     executedAt: new Date().toISOString().split('T')[0],
-    notes: '',
   });
 
   const { data: searchResults = [] } = useAssetSearch(searchQuery);
@@ -41,10 +39,7 @@ export function TransactionForm({ portfolioId, onSuccess, onCancel }: Transactio
         type: formData.type,
         quantity: parseFloat(formData.quantity),
         price: parseFloat(formData.price),
-        fee: formData.fee ? parseFloat(formData.fee) : 0,
-        currency: 'USD',
         executedAt: new Date(formData.executedAt),
-        notes: formData.notes || undefined,
       });
 
       // Reset form
@@ -52,9 +47,7 @@ export function TransactionForm({ portfolioId, onSuccess, onCancel }: Transactio
         type: 'buy',
         quantity: '',
         price: '',
-        fee: '',
         executedAt: new Date().toISOString().split('T')[0],
-        notes: '',
       });
       setSelectedAsset(null);
       setSearchQuery('');
@@ -67,7 +60,7 @@ export function TransactionForm({ portfolioId, onSuccess, onCancel }: Transactio
 
   const totalValue =
     formData.quantity && formData.price
-      ? parseFloat(formData.quantity) * parseFloat(formData.price) + (parseFloat(formData.fee) || 0)
+      ? parseFloat(formData.quantity) * parseFloat(formData.price)
       : 0;
 
   return (
@@ -140,8 +133,6 @@ export function TransactionForm({ portfolioId, onSuccess, onCancel }: Transactio
         >
           <option value="buy">Buy</option>
           <option value="sell">Sell</option>
-          <option value="dividend">Dividend</option>
-          <option value="fee">Fee</option>
         </select>
       </div>
 
@@ -171,18 +162,6 @@ export function TransactionForm({ portfolioId, onSuccess, onCancel }: Transactio
         />
       </div>
 
-      {/* Fee */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Fee (Optional)</label>
-        <input
-          type="number"
-          step="0.01"
-          value={formData.fee}
-          onChange={(e) => setFormData({ ...formData, fee: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
       {/* Execution Date */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Execution Date</label>
@@ -191,17 +170,6 @@ export function TransactionForm({ portfolioId, onSuccess, onCancel }: Transactio
           value={formData.executedAt}
           onChange={(e) => setFormData({ ...formData, executedAt: e.target.value })}
           required
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      {/* Notes */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
-        <textarea
-          value={formData.notes}
-          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          rows={3}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>

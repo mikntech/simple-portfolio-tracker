@@ -4,7 +4,7 @@ import { TransactionForm } from '../components/TransactionForm';
 import { CSVUpload } from '../components/CSVUpload';
 import { TransactionList } from '../components/TransactionList';
 import { AllocationManager } from '../components/AllocationManager';
-import { usePortfolios, useCreatePortfolio } from '../hooks/usePortfolios';
+import { usePortfolios } from '../hooks/usePortfolios';
 import { useAuth } from '../contexts/AuthContext';
 
 export function HomePage() {
@@ -14,13 +14,9 @@ export function HomePage() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'allocations'>(
     'dashboard'
   );
-  const [showCreatePortfolio, setShowCreatePortfolio] = useState(false);
 
-  const { data: portfoliosData, isLoading } = usePortfolios();
-  const createPortfolio = useCreatePortfolio();
   const { user, signOut } = useAuth();
-
-  const portfolios = portfoliosData?.items || [];
+  const { data: portfolios = [], isLoading } = usePortfolios(user?.userId);
 
   // Auto-select first portfolio if available
   useEffect(() => {
@@ -28,25 +24,6 @@ export function HomePage() {
       setSelectedPortfolioId(portfolios[0].id);
     }
   }, [portfolios, selectedPortfolioId]);
-
-  const handleCreatePortfolio = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get('name') as string;
-    const description = formData.get('description') as string;
-
-    try {
-      const newPortfolio = await createPortfolio.mutateAsync({
-        name,
-        description: description || undefined,
-        currency: 'USD',
-      });
-      setSelectedPortfolioId(newPortfolio.id);
-      setShowCreatePortfolio(false);
-    } catch (error) {
-      console.error('Failed to create portfolio:', error);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -82,21 +59,8 @@ export function HomePage() {
                       </option>
                     ))}
                   </select>
-                  <button
-                    onClick={() => setShowCreatePortfolio(true)}
-                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    New Portfolio
-                  </button>
                 </>
-              ) : (
-                <button
-                  onClick={() => setShowCreatePortfolio(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Create Your First Portfolio
-                </button>
-              )}
+              ) : null}
 
               {/* User Menu */}
               <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
@@ -214,66 +178,13 @@ export function HomePage() {
           </>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No portfolios yet. Create one to get started!</p>
-            <button
-              onClick={() => setShowCreatePortfolio(true)}
-              className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Create Portfolio
-            </button>
+            <p className="text-gray-600 mb-4">
+              No portfolios found. A portfolio will be created automatically when you add your first
+              transaction.
+            </p>
           </div>
         )}
       </main>
-
-      {/* Create Portfolio Modal */}
-      {showCreatePortfolio && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h2 className="text-xl font-semibold mb-4">Create New Portfolio</h2>
-            <form onSubmit={handleCreatePortfolio} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Portfolio Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="My Investment Portfolio"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description (Optional)
-                </label>
-                <textarea
-                  name="description"
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Long-term investment portfolio focused on tech stocks..."
-                />
-              </div>
-              <div className="flex gap-3">
-                <button
-                  type="submit"
-                  disabled={createPortfolio.isPending}
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {createPortfolio.isPending ? 'Creating...' : 'Create Portfolio'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowCreatePortfolio(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

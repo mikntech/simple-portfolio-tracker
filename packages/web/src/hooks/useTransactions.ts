@@ -30,7 +30,8 @@ export function useCreateTransaction() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateTransaction) => apiClient.transactions.create(data),
+    mutationFn: (data: CreateTransaction & { portfolioId: string }) =>
+      apiClient.transactions.create(data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['portfolio-summary', variables.portfolioId] });
@@ -43,7 +44,7 @@ export function useCreateTransactionsBatch() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (transactions: CreateTransaction[]) => {
+    mutationFn: async (transactions: (CreateTransaction & { portfolioId: string })[]) => {
       const results = await Promise.all(
         transactions.map((transaction) => apiClient.transactions.create(transaction))
       );
@@ -66,11 +67,13 @@ export function useUpdateTransaction() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<CreateTransaction> }) =>
       apiClient.transactions.update(id, data),
-    onSuccess: (result) => {
+    onSuccess: (result: any) => {
       queryClient.invalidateQueries({ queryKey: ['transaction', result.id] });
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['portfolio-summary', result.portfolioId] });
-      queryClient.invalidateQueries({ queryKey: ['holdings', result.portfolioId] });
+      if (result.portfolioId) {
+        queryClient.invalidateQueries({ queryKey: ['portfolio-summary', result.portfolioId] });
+        queryClient.invalidateQueries({ queryKey: ['holdings', result.portfolioId] });
+      }
     },
   });
 }
@@ -79,14 +82,14 @@ export function useDeleteTransaction() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (transaction: { id: string; portfolioId: string }) => {
+    mutationFn: async (transaction: { id: string }) => {
       await apiClient.transactions.delete(transaction.id);
       return transaction;
     },
     onSuccess: (_, transaction) => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['portfolio-summary', transaction.portfolioId] });
-      queryClient.invalidateQueries({ queryKey: ['holdings', transaction.portfolioId] });
+      queryClient.invalidateQueries({ queryKey: ['portfolio-summary', transaction.id] });
+      queryClient.invalidateQueries({ queryKey: ['holdings', transaction.id] });
     },
   });
 }

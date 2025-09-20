@@ -44,7 +44,6 @@ export function TransactionList({ portfolioId }: TransactionListProps) {
       try {
         await deleteTransaction.mutateAsync({
           id: transaction.id,
-          portfolioId: transaction.portfolioId,
         });
       } catch (error) {
         console.error('Failed to delete transaction:', error);
@@ -159,11 +158,10 @@ function TransactionRow({ transaction, onDelete }: TransactionRowProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: transaction.currency || 'USD',
     }).format(value);
   };
 
-  const total = transaction.quantity * transaction.price + (transaction.fee || 0);
+  const total = transaction.quantity * transaction.price;
 
   const typeColors = {
     buy: 'text-green-600 bg-green-50',
@@ -175,7 +173,7 @@ function TransactionRow({ transaction, onDelete }: TransactionRowProps) {
   return (
     <tr>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-        {new Date(transaction.executedAt).toLocaleDateString()}
+        {new Date(transaction.executedAt ?? 0).toLocaleDateString()}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div>
@@ -198,9 +196,6 @@ function TransactionRow({ transaction, onDelete }: TransactionRowProps) {
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
         {formatCurrency(total)}
-      </td>
-      <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
-        {transaction.notes || '-'}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <button onClick={onDelete} className="text-red-600 hover:text-red-900">

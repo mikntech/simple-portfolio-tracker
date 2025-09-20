@@ -19,78 +19,39 @@ export const CreateUserSchema = UserSchema.omit({
 
 export type CreateUser = z.infer<typeof CreateUserSchema>;
 
-// Portfolio models
-export const PortfolioSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
-  name: z.string().min(1),
-  description: z.string().optional(),
-  currency: z.string().default('USD'),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
-
-export type Portfolio = z.infer<typeof PortfolioSchema>;
-
-export const CreatePortfolioSchema = PortfolioSchema.omit({
-  id: true,
-  userId: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type CreatePortfolio = z.infer<typeof CreatePortfolioSchema>;
-
-// Asset types
-export const AssetTypeSchema = z.enum(['stock', 'etf', 'crypto', 'bond', 'commodity', 'cash']);
-export type AssetType = z.infer<typeof AssetTypeSchema>;
-
 // Asset models
 export const AssetSchema = z.object({
   id: z.string().uuid(),
   symbol: z.string().min(1),
   name: z.string().min(1),
-  type: AssetTypeSchema,
-  exchange: z.string().optional(),
-  currency: z.string().default('USD'),
-  metadata: z.record(z.any()).optional(),
 });
 
 export type Asset = z.infer<typeof AssetSchema>;
 
 // Transaction types
-export const TransactionTypeSchema = z.enum(['buy', 'sell', 'dividend', 'fee']);
+export const TransactionTypeSchema = z.enum(['buy', 'sell']);
 export type TransactionType = z.infer<typeof TransactionTypeSchema>;
 
 // Transaction models
 export const TransactionSchema = z.object({
   id: z.string().uuid(),
-  portfolioId: z.string().uuid(),
   assetId: z.string().uuid(),
   type: TransactionTypeSchema,
   quantity: z.number().positive(),
   price: z.number().nonnegative(),
-  fee: z.number().nonnegative().default(0),
-  currency: z.string().default('USD'),
-  executedAt: z.date(),
-  notes: z.string().optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  executedAt: z.date().optional(),
 });
 
 export type Transaction = z.infer<typeof TransactionSchema>;
 
 export const CreateTransactionSchema = TransactionSchema.omit({
   id: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 export type CreateTransaction = z.infer<typeof CreateTransactionSchema>;
 
 // Holding models (calculated from transactions)
 export const HoldingSchema = z.object({
-  portfolioId: z.string().uuid(),
   assetId: z.string().uuid(),
   quantity: z.number(),
   averageCost: z.number(),
@@ -105,7 +66,6 @@ export type Holding = z.infer<typeof HoldingSchema>;
 
 // Portfolio summary
 export const PortfolioSummarySchema = z.object({
-  portfolioId: z.string().uuid(),
   totalValue: z.number(),
   totalCost: z.number(),
   totalGainLoss: z.number(),
@@ -164,7 +124,6 @@ export type PaginatedResponse<T> = {
 // Allocation models
 export const AllocationSchema = z.object({
   id: z.string().uuid(),
-  portfolioId: z.string().uuid(),
   assetId: z.string().uuid(),
   targetPercentage: z.number().min(0).max(100),
   createdAt: z.date(),

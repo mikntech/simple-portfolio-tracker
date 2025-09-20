@@ -1,25 +1,54 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
+import { createApiResponse } from '../../utils/lambda-handler';
 
-export const handler = async (
-  event: APIGatewayProxyEvent,
-  context: Context
-): Promise<APIGatewayProxyResult> => {
-  console.log('Event:', JSON.stringify(event, null, 2));
+const dynamoClient = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
-  return {
-    statusCode: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-      'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-    },
-    body: JSON.stringify({
-      message: 'Portfolio Service API - Handler not implemented yet',
-      handler: context.functionName,
-      path: event.path,
-      method: event.httpMethod,
-      timestamp: new Date().toISOString(),
-    }),
-  };
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  try {
+    const portfolioId = event.pathParameters?.id;
+
+    if (!portfolioId) {
+      return createApiResponse(400, {
+        success: false,
+        error: {
+          code: 'INVALID_REQUEST',
+          message: 'Portfolio ID is required',
+        },
+      });
+    }
+
+    const result = await docClient.send(
+      new GetCommand({
+        TableName: process.env.PORTFOLIOS_TABLE!,
+        Key: { id: portfolioId },
+      })
+    );
+
+    if (!result.Item) {
+      return createApiResponse(404, {
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Portfolio not found',
+        },
+      });
+    }
+
+    return createApiResponse(200, {
+      success: true,
+      data: result.Item,
+    });
+  } catch (error) {
+    console.error('Error getting portfolio:', error);
+    return createApiResponse(500, {
+      success: false,
+      error: {
+        code: 'GET_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to get portfolio',
+      },
+    });
+  }
 };

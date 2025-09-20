@@ -24,8 +24,8 @@ export function useCreateAllocation() {
   return useMutation({
     mutationFn: (data: CreateAllocation) => apiClient.allocations.create(data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['allocations', variables.portfolioId] });
-      queryClient.invalidateQueries({ queryKey: ['allocation-summary', variables.portfolioId] });
+      queryClient.invalidateQueries({ queryKey: ['allocations', variables.assetId] });
+      queryClient.invalidateQueries({ queryKey: ['allocation-summary', variables.assetId] });
     },
   });
 }
@@ -37,8 +37,8 @@ export function useUpdateAllocation() {
     mutationFn: ({ id, data }: { id: string; data: UpdateAllocation }) =>
       apiClient.allocations.update(id, data),
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['allocations', result.portfolioId] });
-      queryClient.invalidateQueries({ queryKey: ['allocation-summary', result.portfolioId] });
+      queryClient.invalidateQueries({ queryKey: ['allocations', result.id] });
+      queryClient.invalidateQueries({ queryKey: ['allocation-summary', result.id] });
     },
   });
 }
@@ -47,11 +47,10 @@ export function useDeleteAllocation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, portfolioId }: { id: string; portfolioId: string }) =>
-      apiClient.allocations.delete(id).then(() => ({ id, portfolioId })),
-    onSuccess: (_, { portfolioId }) => {
-      queryClient.invalidateQueries({ queryKey: ['allocations', portfolioId] });
-      queryClient.invalidateQueries({ queryKey: ['allocation-summary', portfolioId] });
+    mutationFn: ({ id }: { id: string }) => apiClient.allocations.delete(id).then(() => ({ id })),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['allocations', id] });
+      queryClient.invalidateQueries({ queryKey: ['allocation-summary', id] });
     },
   });
 }

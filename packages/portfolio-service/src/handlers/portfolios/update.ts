@@ -1,25 +1,66 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { createApiResponse } from '../../utils/lambda-handler';
 
-export const handler = async (
-  event: APIGatewayProxyEvent,
-  context: Context
-): Promise<APIGatewayProxyResult> => {
-  console.log('Event:', JSON.stringify(event, null, 2));
+const dynamoClient = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
-  return {
-    statusCode: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-      'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-    },
-    body: JSON.stringify({
-      message: 'Portfolio Service API - Handler not implemented yet',
-      handler: context.functionName,
-      path: event.path,
-      method: event.httpMethod,
-      timestamp: new Date().toISOString(),
-    }),
-  };
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  try {
+    const portfolioId = event.pathParameters?.id;
+    const body = JSON.parse(event.body || '{}');
+
+    if (!portfolioId) {
+      return createApiResponse(400, {
+        success: false,
+        error: {
+          code: 'INVALID_REQUEST',
+          message: 'Portfolio ID is required',
+        },
+      });
+    }
+
+    const { name } = body;
+
+    if (!name) {
+      return createApiResponse(400, {
+        success: false,
+        error: {
+          code: 'INVALID_REQUEST',
+          message: 'Name is required',
+        },
+      });
+    }
+
+    const result = await docClient.send(
+      new UpdateCommand({
+        TableName: process.env.PORTFOLIOS_TABLE!,
+        Key: { id: portfolioId },
+        UpdateExpression: 'SET #name = :name, updatedAt = :updatedAt',
+        ExpressionAttributeNames: {
+          '#name': 'name',
+        },
+        ExpressionAttributeValues: {
+          ':name': name,
+          ':updatedAt': new Date().toISOString(),
+        },
+        ReturnValues: 'ALL_NEW',
+      })
+    );
+
+    return createApiResponse(200, {
+      success: true,
+      data: result.Attributes,
+    });
+  } catch (error) {
+    console.error('Error updating portfolio:', error);
+    return createApiResponse(500, {
+      success: false,
+      error: {
+        code: 'UPDATE_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to update portfolio',
+      },
+    });
+  }
 };

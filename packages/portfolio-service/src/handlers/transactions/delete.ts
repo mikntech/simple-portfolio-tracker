@@ -1,25 +1,44 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, DeleteCommand } from '@aws-sdk/lib-dynamodb';
+import { createApiResponse } from '../../utils/lambda-handler';
 
-export const handler = async (
-  event: APIGatewayProxyEvent,
-  context: Context
-): Promise<APIGatewayProxyResult> => {
-  console.log('Event:', JSON.stringify(event, null, 2));
+const dynamoClient = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
-  return {
-    statusCode: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-      'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-    },
-    body: JSON.stringify({
-      message: 'Portfolio Service API - Handler not implemented yet',
-      handler: context.functionName,
-      path: event.path,
-      method: event.httpMethod,
-      timestamp: new Date().toISOString(),
-    }),
-  };
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  try {
+    const transactionId = event.pathParameters?.id;
+
+    if (!transactionId) {
+      return createApiResponse(400, {
+        success: false,
+        error: {
+          code: 'INVALID_REQUEST',
+          message: 'Transaction ID is required',
+        },
+      });
+    }
+
+    await docClient.send(
+      new DeleteCommand({
+        TableName: process.env.TRANSACTIONS_TABLE!,
+        Key: { id: transactionId },
+      })
+    );
+
+    return createApiResponse(200, {
+      success: true,
+      data: { message: 'Transaction deleted successfully' },
+    });
+  } catch (error) {
+    console.error('Error deleting transaction:', error);
+    return createApiResponse(500, {
+      success: false,
+      error: {
+        code: 'DELETE_FAILED',
+        message: error instanceof Error ? error.message : 'Failed to delete transaction',
+      },
+    });
+  }
 };

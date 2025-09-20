@@ -2,8 +2,6 @@ import { z } from 'zod';
 import {
   UserSchema,
   CreateUserSchema,
-  PortfolioSchema,
-  CreatePortfolioSchema,
   AssetSchema,
   TransactionSchema,
   CreateTransactionSchema,
@@ -49,35 +47,6 @@ export const UserApiContracts = {
 
 // Portfolio API contracts
 export const PortfolioApiContracts = {
-  createPortfolio: {
-    method: 'POST' as const,
-    path: '/portfolios',
-    request: CreatePortfolioSchema,
-    response: ApiResponseSchema(PortfolioSchema),
-  },
-  getPortfolio: {
-    method: 'GET' as const,
-    path: '/portfolios/:id',
-    params: z.object({ id: z.string().uuid() }),
-    response: ApiResponseSchema(PortfolioSchema),
-  },
-  listPortfolios: {
-    method: 'GET' as const,
-    path: '/portfolios',
-    query: z.object({
-      userId: z.string().uuid().optional(),
-      page: z.number().int().positive().optional(),
-      limit: z.number().int().positive().max(100).optional(),
-    }),
-    response: ApiResponseSchema(PaginatedResponseSchema(PortfolioSchema)),
-  },
-  updatePortfolio: {
-    method: 'PUT' as const,
-    path: '/portfolios/:id',
-    params: z.object({ id: z.string().uuid() }),
-    request: CreatePortfolioSchema.partial(),
-    response: ApiResponseSchema(PortfolioSchema),
-  },
   deletePortfolio: {
     method: 'DELETE' as const,
     path: '/portfolios/:id',

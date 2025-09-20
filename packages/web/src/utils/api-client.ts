@@ -1,7 +1,6 @@
 import { ApiContracts } from '@portfolio-tracker/api-contracts';
 import type {
   User,
-  Portfolio,
   Transaction,
   Asset,
   Holding,
@@ -11,6 +10,7 @@ import type {
   CreateAllocation,
   UpdateAllocation,
   PortfolioAllocationSummary,
+  PortfolioSummary,
 } from '@portfolio-tracker/shared-types';
 
 const API_BASE_URL = import.meta.env['VITE_API_URL'] || 'http://localhost:3000';
@@ -98,38 +98,16 @@ class ApiClient {
     },
   };
 
-  // Portfolio endpoints
+  // Portfolio endpoints (simplified - most CRUD operations removed)
   portfolios = {
-    create: async (data: {
-      name: string;
-      description?: string;
-      currency?: string;
-    }): Promise<Portfolio> => {
-      const response = await this.request<Portfolio>('POST', '/portfolios', { body: data });
-      return response.data!;
-    },
+    // Note: In the simplified backend, portfolios are automatically created with users
+    // These methods are kept for backwards compatibility but some will need to be handled differently
 
-    get: async (id: string): Promise<Portfolio> => {
-      const response = await this.request<Portfolio>('GET', `/portfolios/${id}`);
-      return response.data!;
-    },
-
-    list: async (params?: {
-      userId?: string;
-      page?: number;
-      limit?: number;
-    }): Promise<PaginatedResponse<Portfolio>> => {
-      const response = await this.request<PaginatedResponse<Portfolio>>('GET', '/portfolios', {
+    list: async (params?: { userId?: string }): Promise<any[]> => {
+      // This endpoint exists in the backend but not in API contracts
+      const response = await this.request<any[]>('GET', '/portfolios', {
         query: params,
       });
-      return response.data!;
-    },
-
-    update: async (
-      id: string,
-      data: Partial<{ name: string; description?: string; currency?: string }>
-    ): Promise<Portfolio> => {
-      const response = await this.request<Portfolio>('PUT', `/portfolios/${id}`, { body: data });
       return response.data!;
     },
 
@@ -137,8 +115,8 @@ class ApiClient {
       await this.request('DELETE', `/portfolios/${id}`);
     },
 
-    getSummary: async (id: string): Promise<any> => {
-      const response = await this.request('GET', `/portfolios/${id}/summary`);
+    getSummary: async (id: string): Promise<PortfolioSummary> => {
+      const response = await this.request<PortfolioSummary>('GET', `/portfolios/${id}/summary`);
       return response.data!;
     },
   };
@@ -148,18 +126,15 @@ class ApiClient {
     create: async (data: {
       portfolioId: string;
       assetId: string;
-      type: 'buy' | 'sell' | 'dividend' | 'fee';
+      type: 'buy' | 'sell';
       quantity: number;
       price: number;
-      fee?: number;
-      currency?: string;
-      executedAt: Date;
-      notes?: string;
+      executedAt?: Date;
     }): Promise<Transaction> => {
       const response = await this.request<Transaction>('POST', '/transactions', {
         body: {
           ...data,
-          executedAt: data.executedAt.toISOString(),
+          executedAt: data.executedAt?.toISOString(),
         },
       });
       return response.data!;
@@ -188,13 +163,11 @@ class ApiClient {
     update: async (
       id: string,
       data: Partial<{
-        type: 'buy' | 'sell' | 'dividend' | 'fee';
-        quantity: number;
-        price: number;
-        fee?: number;
-        currency?: string;
-        executedAt: Date;
-        notes?: string;
+        assetId?: string;
+        type?: 'buy' | 'sell';
+        quantity?: number;
+        price?: number;
+        executedAt?: Date;
       }>
     ): Promise<Transaction> => {
       const response = await this.request<Transaction>('PUT', `/transactions/${id}`, {
