@@ -29,6 +29,7 @@ export function createHandler<TBody = any, TParams = any, TQuery = any>(
     const allowedOrigins = [
       'https://app.keeride.com',
       'http://localhost:5173',
+      'http://localhost:3000',
       'http://localhost:3001',
     ];
     const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
