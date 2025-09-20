@@ -15,8 +15,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@template/shared/*": ["packages/shared/src/*"],
-      "@template/trpc-shared": ["packages/trpc-shared/src/index.ts"]
+      "@portfolio-tracker/shared-types": ["packages/shared-types/src/index.ts"],
+      "@portfolio-tracker/api-contracts": ["packages/api-contracts/src/index.ts"],
+      "@portfolio-tracker/api": ["packages/api/src/index.ts"]
     },
     "strict": true,
     "esModuleInterop": true,

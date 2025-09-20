@@ -43,14 +43,14 @@ TABLE_NAME=template-data-table
 EOF
 
 # Frontend .env
-cat > apps/web/.env << EOF
+cat > packages/web/.env << EOF
 VITE_API_URL=http://localhost:4000
 VITE_ENABLE_ANALYTICS=false
 VITE_ENABLE_AUTH=false
 EOF
 
 # Backend .env
-cat > apps/api/.env << EOF
+cat > packages/api/.env << EOF
 PORT=4000
 NODE_ENV=development
 TABLE_NAME=template-data-table

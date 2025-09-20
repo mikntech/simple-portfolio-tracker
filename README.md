@@ -1,275 +1,264 @@
-# Full-Stack Monorepo Template
+# Simple Portfolio Tracker
 
-A modern, production-ready full-stack monorepo template featuring pnpm workspaces, Nx build system, tRPC for type-safe APIs, AWS CDK for infrastructure as code, Vite + React + Tailwind CSS for the frontend, and GitHub Actions for CI/CD.
+A modern portfolio tracking application built with AWS serverless technologies, React, and TypeScript. Track your investments, manage portfolios, set target allocations, and analyze your holdings.
 
-## 🚀 Features
+## Features
 
-- **Monorepo Management**: Efficient workspace management with pnpm and Nx
-- **Type-Safe API**: End-to-end type safety with tRPC
-- **Modern Frontend**: React 18 with Vite for lightning-fast HMR and Tailwind CSS for styling
-- **Infrastructure as Code**: AWS CDK for declarative cloud infrastructure
-- **CI/CD Pipeline**: Automated workflows with GitHub Actions
-- **Developer Experience**: TypeScript, ESLint, Prettier, and Husky pre-configured
+- 🔐 **Secure Authentication**: Google Sign-In via AWS Cognito
+- 📊 **Portfolio Management**: Create and manage multiple investment portfolios
+- 💰 **Transaction Tracking**: Add transactions individually or bulk import via CSV
+- 🎯 **Target Allocations**: Set desired portfolio allocations and track deviations
+- 📈 **Real-time Analytics**: View holdings, performance, and rebalancing suggestions
+- 🔄 **Automated Deployments**: GitHub Actions CI/CD pipeline
 
-## 📦 Tech Stack
+## Tech Stack
 
 ### Frontend
 
-- **React 18** - UI library
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **TanStack Query** - Data fetching and caching
-- **tRPC Client** - Type-safe API client
+- React 18 with TypeScript
+- Vite for fast development
+- TanStack Query for data fetching
+- Tailwind CSS for styling
+- AWS Amplify for authentication
 
 ### Backend
 
-- **Node.js** - Runtime environment
-- **Express** - Web framework
-- **tRPC Server** - Type-safe API framework
-- **Zod** - Schema validation
+- AWS Lambda functions
+- API Gateway REST API
+- DynamoDB for data storage
+- AWS CDK for infrastructure as code
 
 ### Infrastructure
 
-- **AWS CDK** - Infrastructure as code
-- **AWS Lambda** - Serverless compute
-- **AWS S3** - Static file hosting
-- **AWS CloudFront** - CDN
-- **AWS DynamoDB** - NoSQL database
-- **AWS API Gateway** - API management
+- CloudFront for global content delivery
+- S3 for static website hosting
+- Route53 for DNS management
+- ACM for SSL certificates
 
-### DevOps
-
-- **GitHub Actions** - CI/CD pipelines
-- **pnpm** - Fast, disk space efficient package manager
-- **Nx** - Smart, fast build system
-- **TypeScript** - Type safety across the stack
-
-## 🏗️ Project Structure
+## Project Structure
 
 ```
-.
-├── apps/
+simple-portfolio-tracker/
+├── packages/
 │   ├── web/                 # React frontend application
-│   │   ├── src/
-│   │   ├── public/
-│   │   └── package.json
-│   ├── api/                 # tRPC backend API
-│   │   ├── src/
-│   │   └── package.json
-│   └── infrastructure/      # AWS CDK infrastructure
-│       ├── src/
-│       ├── bin/
-│       └── package.json
-├── packages/                # Shared packages
-│   └── trpc-shared/        # Shared tRPC types
-├── .github/
-│   └── workflows/          # GitHub Actions workflows
-├── nx.json                 # Nx configuration
-├── pnpm-workspace.yaml     # pnpm workspace config
-└── package.json            # Root package.json
+│   ├── api/                 # API Lambda functions (future)
+│   ├── portfolio-service/   # Portfolio management service
+│   ├── shared-types/        # Shared TypeScript types
+│   ├── api-contracts/       # API contract definitions
+│   ├── base-infra/         # Base AWS infrastructure
+│   └── web-infra/          # Web hosting infrastructure
+├── scripts/                 # Utility scripts
+├── docs/                    # Documentation
+└── .github/workflows/       # CI/CD pipelines
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- Node.js >= 18.0.0
-- pnpm >= 8.0.0
-- AWS CLI (for deployment)
-- AWS Account (for deployment)
+- Node.js 20+
+- pnpm 8+
+- AWS Account
+- AWS CLI configured
+- GitHub repository (for automated deployments)
 
-### Installation
+### Quick Start
 
-1. Clone the repository:
+1. **Clone the repository**
 
-```bash
-git clone <repository-url>
-cd pnpm-nx-trpc-cdk-vite-react-tailwind-template-ga
-```
+   ```bash
+   git clone <repository-url>
+   cd simple-portfolio-tracker
+   ```
 
-2. Install dependencies:
+2. **Install dependencies**
 
-```bash
-pnpm install
-```
+   ```bash
+   pnpm install
+   ```
 
-3. Set up environment variables:
+3. **Set up environment variables**
 
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
+   ```bash
+   ./scripts/get-env-values.sh
+   ```
 
-### Development
+   Then add your Cognito values to `packages/web/.env`
 
-Start all services in development mode:
+4. **Start development servers**
+   ```bash
+   pnpm dev
+   ```
 
-```bash
-pnpm dev
-```
+The application will be available at:
 
-Or start specific services:
+- Web: http://localhost:3001
+- API: http://localhost:3000
 
-```bash
-# Frontend only
-pnpm nx dev web
+## Deployment
 
-# Backend only
-pnpm nx dev api
-```
+### Automated Deployment (Recommended)
 
-The frontend will be available at http://localhost:3000 and the API at http://localhost:4000.
+The project includes GitHub Actions workflows for automated deployment:
 
-### Building
+1. **Set up GitHub Secrets**
+   - `AWS_ACCESS_KEY_ID` - AWS access key
+   - `AWS_SECRET_ACCESS_KEY` - AWS secret key
+   - `GOOGLE_CLIENT_ID` - Google OAuth client ID
+   - `GOOGLE_CLIENT_SECRET` - Google OAuth client secret
+   - `DOMAIN_NAME` - Your production domain (e.g., example.com)
+   - `COGNITO_DOMAIN_PREFIX` (optional) - Unique prefix for Cognito domain (defaults to 'portfolio-tracker-prod')
 
-Build all packages:
+2. **Deploy to Production**
+   - Push to `main` branch
+   - GitHub Actions will automatically deploy
 
-```bash
-pnpm build
-```
-
-Build specific packages:
-
-```bash
-pnpm nx build web
-pnpm nx build api
-```
-
-### Testing
-
-Run all tests:
-
-```bash
-pnpm test
-```
-
-Run tests for affected packages:
-
-```bash
-pnpm nx affected --target=test
-```
-
-### Linting and Formatting
-
-```bash
-# Lint all packages
-pnpm lint
-
-# Format all files
-pnpm format
-
-# Type check
-pnpm nx run-many --target=typecheck
-```
-
-## 🚀 Deployment
-
-### Prerequisites
-
-1. Configure AWS credentials:
-
-```bash
-aws configure
-```
-
-2. Set up GitHub secrets:
-
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_ACCOUNT_ID`
+3. **Preview Deployments**
+   - Create a pull request
+   - Preview build will be created
 
 ### Manual Deployment
 
-1. Build the applications:
+1. **Deploy Infrastructure**
+
+   ```bash
+   # Base infrastructure
+   cd packages/base-infra
+   DOMAIN_NAME="your-domain.com" npm run deploy
+
+   # Authentication infrastructure
+   cd ../auth-infra
+   GOOGLE_CLIENT_ID="your-client-id" \
+   GOOGLE_CLIENT_SECRET="your-client-secret" \
+   WEB_DOMAIN="your-domain.com" \
+   COGNITO_DOMAIN_PREFIX="your-unique-prefix" \
+   ./deploy.sh
+
+   # Portfolio service
+   cd ../portfolio-service/cdk
+   npm run deploy
+
+   # Web infrastructure
+   cd ../../web-infra
+   npm run deploy
+   ```
+
+2. **Build and Deploy Web App**
+   ```bash
+   cd packages/web
+   pnpm build
+   aws s3 sync dist/ s3://YOUR-BUCKET-NAME/
+   aws cloudfront create-invalidation --distribution-id YOUR-DIST-ID --paths "/*"
+   ```
+
+## Environment Configuration
+
+### Required Environment Variables
 
 ```bash
-pnpm build
-```
-
-2. Deploy infrastructure:
-
-```bash
-cd apps/infrastructure
-pnpm cdk deploy
-```
-
-3. The GitHub Actions workflow will automatically deploy on push to main branch.
-
-### Automated Deployment
-
-Push to the main branch triggers automatic deployment via GitHub Actions.
-
-## 📝 Available Scripts
-
-### Root Level
-
-- `pnpm dev` - Start all services in development mode
-- `pnpm build` - Build all packages
-- `pnpm test` - Run all tests
-- `pnpm lint` - Lint all packages
-- `pnpm format` - Format all files
-- `pnpm clean` - Clean all build artifacts and node_modules
-
-### Per Package
-
-- `pnpm nx dev <package>` - Start specific package in dev mode
-- `pnpm nx build <package>` - Build specific package
-- `pnpm nx test <package>` - Test specific package
-- `pnpm nx lint <package>` - Lint specific package
-
-## 🏗️ Infrastructure
-
-The CDK stack includes:
-
-- S3 bucket for hosting the React app
-- CloudFront distribution for CDN
-- Lambda function for the API
-- API Gateway for HTTP endpoints
-- DynamoDB table for data storage
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
 # API Configuration
-PORT=4000
-NODE_ENV=development
+VITE_API_URL=https://api.yourdomain.com
 
-# AWS Configuration (for local development)
-AWS_REGION=us-east-1
-AWS_PROFILE=default
-
-# Database
-TABLE_NAME=template-data-table
+# AWS Cognito Configuration
+VITE_COGNITO_USER_POOL_ID=us-east-1_xxxxxxxxx
+VITE_COGNITO_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxx
+VITE_COGNITO_DOMAIN=your-domain.auth.us-east-1.amazoncognito.com
+VITE_REDIRECT_SIGN_IN=https://app.yourdomain.com/
+VITE_REDIRECT_SIGN_OUT=https://app.yourdomain.com/
 ```
 
-### TypeScript Paths
+### Authentication Setup
 
-The monorepo uses TypeScript path aliases:
+The authentication infrastructure is managed via CDK and includes:
 
-- `@template/shared/*` - Shared utilities
-- `@template/trpc-shared` - Shared tRPC types
-- `@/*` - Within each app for local imports
+- AWS Cognito User Pool with email authentication
+- Google Sign-In integration (optional)
+- Automated configuration via infrastructure as code
 
-## 🤝 Contributing
+**Note**: Cognito configuration is automatically created during deployment. You only need to provide Google OAuth credentials as GitHub secrets.
+
+See [Authentication Infrastructure](./packages/auth-infra/README.md) for detailed setup.
+
+## Development
+
+### Local Development
+
+See [Local Development Guide](./docs/LOCAL_DEVELOPMENT.md) for detailed setup instructions.
+
+### Key Commands
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start development servers
+pnpm dev
+
+# Build all packages
+pnpm build
+
+# Run tests
+pnpm test
+
+# Lint code
+pnpm lint
+
+# Type check
+pnpm typecheck
+```
+
+### Adding a New Package
+
+```bash
+# Create a new package
+mkdir packages/new-package
+cd packages/new-package
+pnpm init
+
+# Add to workspace
+# Edit package.json name to @portfolio-tracker/new-package
+```
+
+## Architecture
+
+The application follows a serverless microservices architecture:
+
+- **Frontend**: Single-page React application served via CloudFront
+- **API**: RESTful API built with API Gateway and Lambda
+- **Database**: DynamoDB tables for each domain entity
+- **Authentication**: Managed by AWS Cognito with JWT tokens
+
+See [Architecture Documentation](./docs/ARCHITECTURE.md) for more details.
+
+## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+See [Contributing Guidelines](./CONTRIBUTING.md) for more details.
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Security
 
-## 🙏 Acknowledgments
+- All API endpoints require authentication
+- Data is encrypted at rest in DynamoDB
+- SSL/TLS encryption for all communications
+- Principle of least privilege for IAM roles
 
-- [Nx](https://nx.dev/) for the amazing monorepo tools
-- [tRPC](https://trpc.io/) for type-safe APIs
-- [AWS CDK](https://aws.amazon.com/cdk/) for infrastructure as code
-- [Vite](https://vitejs.dev/) for the blazing fast dev experience
-- [Tailwind CSS](https://tailwindcss.com/) for utility-first CSS
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+
+## Support
+
+- 📧 Email: support@example.com
+- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/simple-portfolio-tracker/discussions)
+- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/simple-portfolio-tracker/issues)
+
+## Acknowledgments
+
+- Built with AWS CDK
+- UI components inspired by Tailwind UI
+- Authentication powered by AWS Cognito

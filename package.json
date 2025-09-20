@@ -1,11 +1,12 @@
 {
-  "name": "pnpm-nx-trpc-cdk-vite-react-tailwind-template",
+  "name": "simple-portfolio-tracker",
   "version": "1.0.0",
   "private": true,
-  "description": "A modern full-stack monorepo template with pnpm, Nx, tRPC, AWS CDK, Vite, React, and Tailwind CSS",
+  "description": "Based on a modern full-stack monorepo template with pnpm, Nx, tRPC, AWS CDK, Vite, React, and Tailwind CSS",
+  "author": "Michael Nusair",
   "license": "MIT",
   "engines": {
-    "node": ">=22.0.0",
+    "node": ">=20.0.0",
     "pnpm": ">=8.0.0"
   },
   "packageManager": "pnpm@8.15.0",
@@ -15,7 +16,7 @@
     "test": "nx run-many --target=test --all",
     "lint": "nx run-many --target=lint --all",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,mdx,css,html,yml,yaml}\"",
-    "clean": "nx reset && rm -rf node_modules apps/*/node_modules packages/*/node_modules",
+    "clean": "nx reset && rm -rf node_modules packages/*/node_modules",
     "prepare": "husky install"
   },
   "devDependencies": {

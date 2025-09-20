@@ -2,39 +2,48 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '20.x'
-  PNPM_VERSION: '8'
-  AWS_REGION: 'us-east-1'
+  AWS_REGION: us-east-1
+  NODE_VERSION: '20'
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Build all packages
-        run: pnpm build
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -43,59 +52,86 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Install AWS CDK
-        run: npm install -g aws-cdk
-
       - name: Deploy infrastructure
-        working-directory: apps/infrastructure
         run: |
-          cdk bootstrap
-          cdk deploy --require-approval never
+          # Deploy base infrastructure
+          cd packages/base-infra
+          DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} npm run cdk bootstrap || true
+          DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} npm run cdk -- deploy --require-approval never --outputs-file outputs.json
+          cd ../..
 
-      - name: Deploy API to Lambda
-        run: |
-          cd apps/api
-          zip -r api.zip dist/
-          aws lambda update-function-code \
-            --function-name template-api \
-            --zip-file fileb://api.zip
+          # Deploy auth infrastructure
+          cd packages/auth-infra
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
+          WEB_DOMAIN=app.${{ secrets.DOMAIN_NAME }} \
+          COGNITO_DOMAIN_PREFIX=${{ secrets.COGNITO_DOMAIN_PREFIX || 'portfolio-tracker-prod' }} \
+          npm run cdk -- deploy --require-approval never --outputs-file outputs.json
+          cd ../..
 
-      - name: Deploy frontend to S3
+          # Deploy portfolio service
+          cd packages/portfolio-service/cdk
+          npm run cdk -- deploy --require-approval never
+          cd ../../..
+
+          # Deploy web infrastructure
+          cd packages/web-infra
+          DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} npm run cdk -- deploy --require-approval never --outputs-file outputs.json
+          cd ../..
+
+      - name: Extract CDK outputs
+        id: cdk-outputs
         run: |
-          aws s3 sync apps/web/dist/ s3://template-website-${{ secrets.AWS_ACCOUNT_ID }}-${{ env.AWS_REGION }}/ \
+          # Extract API URL from base-infra outputs
+          API_URL=$(jq -r '.BaseInfraStack.ApiGatewayUrl' packages/base-infra/outputs.json)
+          echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
+
+          # Extract auth outputs
+          USER_POOL_ID=$(jq -r '.AuthInfraStack.UserPoolId' packages/auth-infra/outputs.json)
+          CLIENT_ID=$(jq -r '.AuthInfraStack.UserPoolClientId' packages/auth-infra/outputs.json)
+          COGNITO_DOMAIN=$(jq -r '.AuthInfraStack.CognitoDomain' packages/auth-infra/outputs.json)
+          echo "USER_POOL_ID=$USER_POOL_ID" >> $GITHUB_OUTPUT
+          echo "CLIENT_ID=$CLIENT_ID" >> $GITHUB_OUTPUT
+          echo "COGNITO_DOMAIN=$COGNITO_DOMAIN" >> $GITHUB_OUTPUT
+
+          # Extract web infra outputs
+          S3_BUCKET=$(jq -r '.WebInfraStack.WebBucketName' packages/web-infra/outputs.json)
+          DISTRIBUTION_ID=$(jq -r '.WebInfraStack.DistributionId' packages/web-infra/outputs.json)
+          echo "S3_BUCKET=$S3_BUCKET" >> $GITHUB_OUTPUT
+          echo "DISTRIBUTION_ID=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
+
+      - name: Build web application
+        run: |
+          cd packages/web
+
+          # Create .env file with CDK outputs
+          cat > .env << EOF
+          VITE_API_URL=${{ steps.cdk-outputs.outputs.API_URL }}
+          VITE_COGNITO_USER_POOL_ID=${{ steps.cdk-outputs.outputs.USER_POOL_ID }}
+          VITE_COGNITO_CLIENT_ID=${{ steps.cdk-outputs.outputs.CLIENT_ID }}
+          VITE_COGNITO_DOMAIN=${{ steps.cdk-outputs.outputs.COGNITO_DOMAIN }}
+          VITE_REDIRECT_SIGN_IN=https://app.${{ secrets.DOMAIN_NAME }}/
+          VITE_REDIRECT_SIGN_OUT=https://app.${{ secrets.DOMAIN_NAME }}/
+          EOF
+
+          # Build the application
+          pnpm build
+
+      - name: Deploy web application to S3
+        run: |
+          aws s3 sync packages/web/dist/ s3://${{ steps.cdk-outputs.outputs.S3_BUCKET }}/ \
             --delete \
             --cache-control "public, max-age=31536000" \
             --exclude "index.html" \
-            --exclude "*.js" \
-            --exclude "*.css"
+            --exclude "*.json"
 
-          aws s3 cp apps/web/dist/index.html s3://template-website-${{ secrets.AWS_ACCOUNT_ID }}-${{ env.AWS_REGION }}/ \
-            --cache-control "public, max-age=0, must-revalidate"
-
-          aws s3 cp apps/web/dist/ s3://template-website-${{ secrets.AWS_ACCOUNT_ID }}-${{ env.AWS_REGION }}/ \
-            --recursive \
-            --exclude "*" \
-            --include "*.js" \
-            --include "*.css" \
-            --cache-control "public, max-age=31536000"
+          # Upload HTML and JSON files with no cache
+          aws s3 cp packages/web/dist/index.html s3://${{ steps.cdk-outputs.outputs.S3_BUCKET }}/index.html \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --content-type "text/html"
 
       - name: Invalidate CloudFront cache
         run: |
-          DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
-            --stack-name TemplateInfrastructureStack \
-            --query "Stacks[0].Outputs[?OutputKey=='DistributionId'].OutputValue" \
-            --output text)
-
           aws cloudfront create-invalidation \
-            --distribution-id $DISTRIBUTION_ID \
+            --distribution-id ${{ steps.cdk-outputs.outputs.DISTRIBUTION_ID }} \
             --paths "/*"
-
-      - name: Get deployment URL
-        run: |
-          WEBSITE_URL=$(aws cloudformation describe-stacks \
-            --stack-name TemplateInfrastructureStack \
-            --query "Stacks[0].Outputs[?OutputKey=='WebsiteURL'].OutputValue" \
-            --output text)
-
-          echo "🚀 Deployment complete!"
-          echo "🌐 Website URL: $WEBSITE_URL"
