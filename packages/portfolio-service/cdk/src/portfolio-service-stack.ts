@@ -446,5 +446,24 @@ export class PortfolioServiceStack extends cdk.Stack {
       value: allocationsTable.tableName,
       description: 'Allocations DynamoDB table name',
     });
+
+    // Force API Gateway deployment
+    const deployment = new apigateway.Deployment(this, 'ApiDeployment', {
+      api,
+      description: `Deployment at ${new Date().toISOString()}`,
+    });
+
+    // Ensure deployment depends on all methods being created
+    deployment.node.addDependency(api);
+
+    // Create or update the prod stage
+    new apigateway.Stage(this, 'ProdStage', {
+      deployment,
+      stageName: 'prod',
+      description: 'Production stage',
+      dataTraceEnabled: true,
+      loggingLevel: apigateway.MethodLoggingLevel.INFO,
+      metricsEnabled: true,
+    });
   }
 }

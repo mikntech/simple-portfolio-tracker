@@ -22,6 +22,14 @@ export function createHandler<TBody = any, TParams = any, TQuery = any>(
   handler: (context: HandlerContext<TBody, TParams, TQuery>) => Promise<ApiResponse<any>>
 ): LambdaHandler {
   return async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    // Log function invocation
+    console.log('[Lambda Handler] Function invoked:', {
+      functionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+      httpMethod: event.httpMethod,
+      path: event.path,
+      timestamp: new Date().toISOString(),
+    });
+
     // Get the origin from the request
     const origin = event.headers.origin || event.headers.Origin || 'https://app.keeride.com';
 
@@ -34,6 +42,15 @@ export function createHandler<TBody = any, TParams = any, TQuery = any>(
     ];
     const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
 
+    // Log CORS details
+    console.log('[CORS Debug]', {
+      requestOrigin: origin,
+      selectedCorsOrigin: corsOrigin,
+      isAllowedOrigin: allowedOrigins.includes(origin),
+      httpMethod: event.httpMethod,
+      headers: event.headers,
+    });
+
     const headers = {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': corsOrigin,
@@ -45,6 +62,7 @@ export function createHandler<TBody = any, TParams = any, TQuery = any>(
 
     // Handle OPTIONS requests for CORS preflight
     if (event.httpMethod === 'OPTIONS') {
+      console.log('[OPTIONS Handler] Handling preflight request');
       return {
         statusCode: 200,
         headers,
