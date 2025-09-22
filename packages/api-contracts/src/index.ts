@@ -47,6 +47,24 @@ export const UserApiContracts = {
 
 // Portfolio API contracts
 export const PortfolioApiContracts = {
+  listPortfolios: {
+    method: 'GET' as const,
+    path: '/portfolios',
+    query: z.object({
+      userId: z.string().uuid(),
+    }),
+    response: ApiResponseSchema(
+      z.array(
+        z.object({
+          id: z.string().uuid(),
+          userId: z.string().uuid(),
+          name: z.string(),
+          createdAt: z.string(),
+          updatedAt: z.string(),
+        })
+      )
+    ),
+  },
   deletePortfolio: {
     method: 'DELETE' as const,
     path: '/portfolios/:id',

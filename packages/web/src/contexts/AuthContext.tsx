@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getCurrentUser, signOut, signInWithRedirect, fetchAuthSession } from 'aws-amplify/auth';
 import type { AuthUser } from 'aws-amplify/auth';
+import { clearBackendUserCache } from '../hooks/useBackendUser';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -56,6 +57,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       await signOut();
       setUser(null);
+      clearBackendUserCache();
     } catch (error) {
       console.error('Error signing out:', error);
     }

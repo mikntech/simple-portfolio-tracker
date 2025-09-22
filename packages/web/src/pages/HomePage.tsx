@@ -6,6 +6,7 @@ import { TransactionList } from '../components/TransactionList';
 import { AllocationManager } from '../components/AllocationManager';
 import { usePortfolios } from '../hooks/usePortfolios';
 import { useAuth } from '../contexts/AuthContext';
+import { useBackendUser } from '../hooks/useBackendUser';
 
 export function HomePage() {
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null);
@@ -16,7 +17,8 @@ export function HomePage() {
   );
 
   const { user, signOut } = useAuth();
-  const { data: portfolios = [], isLoading } = usePortfolios(user?.userId);
+  const { data: backendUser, isLoading: isLoadingUser } = useBackendUser();
+  const { data: portfolios = [], isLoading: isLoadingPortfolios } = usePortfolios(backendUser?.id);
 
   // Auto-select first portfolio if available
   useEffect(() => {
@@ -25,12 +27,16 @@ export function HomePage() {
     }
   }, [portfolios, selectedPortfolioId]);
 
+  const isLoading = isLoadingUser || isLoadingPortfolios;
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading portfolios...</p>
+          <p className="mt-4 text-gray-600">
+            {isLoadingUser ? 'Setting up your account...' : 'Loading portfolios...'}
+          </p>
         </div>
       </div>
     );
