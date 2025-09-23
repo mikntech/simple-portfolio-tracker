@@ -57,17 +57,17 @@ jobs:
         run: |
           # Deploy base infrastructure
           cd packages/base-infra
-          STAGE=dev DOMAIN_NAME=${{ secrets.DEV_DOMAIN_NAME }} npm run cdk bootstrap || true
-          STAGE=dev DOMAIN_NAME=${{ secrets.DEV_DOMAIN_NAME }} npm run cdk -- deploy --require-approval never --outputs-file outputs.json
+          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} npm run cdk bootstrap || true
+          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} npm run cdk -- deploy --require-approval never --outputs-file outputs.json
           cd ../..
 
           # Deploy auth infrastructure
           cd packages/auth-infra
           STAGE=dev \
-          GOOGLE_CLIENT_ID=${{ secrets.DEV_GOOGLE_CLIENT_ID }} \
-          GOOGLE_CLIENT_SECRET=${{ secrets.DEV_GOOGLE_CLIENT_SECRET }} \
-          WEB_DOMAIN=app.${{ secrets.DEV_DOMAIN_NAME }} \
-          COGNITO_DOMAIN_PREFIX=${{ secrets.DEV_COGNITO_DOMAIN_PREFIX || 'portfolio-tracker-dev' }} \
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
+          WEB_DOMAIN=app.${{ secrets.DOMAIN_NAME }} \
+          COGNITO_DOMAIN_PREFIX=${{ secrets.COGNITO_DOMAIN_PREFIX || 'portfolio-tracker-dev' }} \
           npm run cdk -- deploy --require-approval never --outputs-file outputs.json
           cd ../..
 
@@ -78,7 +78,7 @@ jobs:
 
           # Deploy web infrastructure
           cd packages/web-infra
-          STAGE=dev DOMAIN_NAME=${{ secrets.DEV_DOMAIN_NAME }} npm run cdk -- deploy --require-approval never --outputs-file outputs.json
+          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} npm run cdk -- deploy --require-approval never --outputs-file outputs.json
           cd ../..
 
       - name: Extract CDK outputs
@@ -112,8 +112,8 @@ jobs:
           VITE_COGNITO_USER_POOL_ID=${{ steps.cdk-outputs.outputs.USER_POOL_ID }}
           VITE_COGNITO_CLIENT_ID=${{ steps.cdk-outputs.outputs.CLIENT_ID }}
           VITE_COGNITO_DOMAIN=${{ steps.cdk-outputs.outputs.COGNITO_DOMAIN }}
-          VITE_REDIRECT_SIGN_IN=https://app.${{ secrets.DEV_DOMAIN_NAME }}/
-          VITE_REDIRECT_SIGN_OUT=https://app.${{ secrets.DEV_DOMAIN_NAME }}/
+          VITE_REDIRECT_SIGN_IN=https://app.${{ secrets.DOMAIN_NAME }}/
+          VITE_REDIRECT_SIGN_OUT=https://app.${{ secrets.DOMAIN_NAME }}/
           EOF
 
           # Build the application
