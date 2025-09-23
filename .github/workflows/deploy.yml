@@ -14,6 +14,8 @@ jobs:
   deploy-dev:
     runs-on: ubuntu-latest
     # environment: development  # Uncomment if you create GitHub environments
+    env:
+      STAGE: dev
 
     steps:
       - name: Checkout code
@@ -85,20 +87,20 @@ jobs:
         id: cdk-outputs
         run: |
           # Extract API URL from base-infra outputs
-          API_URL=$(jq -r '.BaseInfraStack.ApiGatewayUrl' packages/base-infra/outputs.json)
+          API_URL=$(jq -r '."PortfolioBaseInfraStack-'"$STAGE"'".ApiGatewayUrl' packages/base-infra/outputs.json)
           echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
 
           # Extract auth outputs
-          USER_POOL_ID=$(jq -r '.AuthInfraStack.UserPoolId' packages/auth-infra/outputs.json)
-          CLIENT_ID=$(jq -r '.AuthInfraStack.UserPoolClientId' packages/auth-infra/outputs.json)
-          COGNITO_DOMAIN=$(jq -r '.AuthInfraStack.CognitoDomain' packages/auth-infra/outputs.json)
+          USER_POOL_ID=$(jq -r '."PortfolioAuthInfraStack-'"$STAGE"'".UserPoolId' packages/auth-infra/outputs.json)
+          CLIENT_ID=$(jq -r '."PortfolioAuthInfraStack-'"$STAGE"'".UserPoolClientId' packages/auth-infra/outputs.json)
+          COGNITO_DOMAIN=$(jq -r '."PortfolioAuthInfraStack-'"$STAGE"'".CognitoDomain' packages/auth-infra/outputs.json)
           echo "USER_POOL_ID=$USER_POOL_ID" >> $GITHUB_OUTPUT
           echo "CLIENT_ID=$CLIENT_ID" >> $GITHUB_OUTPUT
           echo "COGNITO_DOMAIN=$COGNITO_DOMAIN" >> $GITHUB_OUTPUT
 
           # Extract web infra outputs
-          S3_BUCKET=$(jq -r '.WebInfraStack.WebBucketName' packages/web-infra/outputs.json)
-          DISTRIBUTION_ID=$(jq -r '.WebInfraStack.DistributionId' packages/web-infra/outputs.json)
+          S3_BUCKET=$(jq -r '."PortfolioWebInfraStack-'"$STAGE"'".WebBucketName' packages/web-infra/outputs.json)
+          DISTRIBUTION_ID=$(jq -r '."PortfolioWebInfraStack-'"$STAGE"'".DistributionId' packages/web-infra/outputs.json)
           echo "S3_BUCKET=$S3_BUCKET" >> $GITHUB_OUTPUT
           echo "DISTRIBUTION_ID=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
 
@@ -142,6 +144,8 @@ jobs:
     runs-on: ubuntu-latest
     # environment: production  # Uncomment if you create GitHub environments
     needs: deploy-dev
+    env:
+      STAGE: prod
 
     steps:
       - name: Checkout code
@@ -213,20 +217,20 @@ jobs:
         id: cdk-outputs
         run: |
           # Extract API URL from base-infra outputs
-          API_URL=$(jq -r '.BaseInfraStack.ApiGatewayUrl' packages/base-infra/outputs.json)
+          API_URL=$(jq -r '."PortfolioBaseInfraStack-'"$STAGE"'".ApiGatewayUrl' packages/base-infra/outputs.json)
           echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
 
           # Extract auth outputs
-          USER_POOL_ID=$(jq -r '.AuthInfraStack.UserPoolId' packages/auth-infra/outputs.json)
-          CLIENT_ID=$(jq -r '.AuthInfraStack.UserPoolClientId' packages/auth-infra/outputs.json)
-          COGNITO_DOMAIN=$(jq -r '.AuthInfraStack.CognitoDomain' packages/auth-infra/outputs.json)
+          USER_POOL_ID=$(jq -r '."PortfolioAuthInfraStack-'"$STAGE"'".UserPoolId' packages/auth-infra/outputs.json)
+          CLIENT_ID=$(jq -r '."PortfolioAuthInfraStack-'"$STAGE"'".UserPoolClientId' packages/auth-infra/outputs.json)
+          COGNITO_DOMAIN=$(jq -r '."PortfolioAuthInfraStack-'"$STAGE"'".CognitoDomain' packages/auth-infra/outputs.json)
           echo "USER_POOL_ID=$USER_POOL_ID" >> $GITHUB_OUTPUT
           echo "CLIENT_ID=$CLIENT_ID" >> $GITHUB_OUTPUT
           echo "COGNITO_DOMAIN=$COGNITO_DOMAIN" >> $GITHUB_OUTPUT
 
           # Extract web infra outputs
-          S3_BUCKET=$(jq -r '.WebInfraStack.WebBucketName' packages/web-infra/outputs.json)
-          DISTRIBUTION_ID=$(jq -r '.WebInfraStack.DistributionId' packages/web-infra/outputs.json)
+          S3_BUCKET=$(jq -r '."PortfolioWebInfraStack-'"$STAGE"'".WebBucketName' packages/web-infra/outputs.json)
+          DISTRIBUTION_ID=$(jq -r '."PortfolioWebInfraStack-'"$STAGE"'".DistributionId' packages/web-infra/outputs.json)
           echo "S3_BUCKET=$S3_BUCKET" >> $GITHUB_OUTPUT
           echo "DISTRIBUTION_ID=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
 

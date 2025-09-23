@@ -34,7 +34,7 @@ const domainName = getEnvFromGACIC({
 });
 const stage = getEnvFromGACIC({ name: 'stage', camelCase: 'stage', UPPER_CASE: 'STAGE' });
 
-new BaseInfraStack(app, 'PortFolioBaseInfraStack', {
+new BaseInfraStack(app, `PortfolioBaseInfraStack-${stage}`, {
   domainName,
   apiSubdomain: app.node.tryGetContext('apiSubdomain') || (stage !== 'prod' ? stage : '') + 'api',
   webSubdomain: app.node.tryGetContext('webSubdomain') || (stage !== 'prod' ? stage : '') + 'app',

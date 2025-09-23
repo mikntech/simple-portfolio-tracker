@@ -8,7 +8,7 @@ const app = new cdk.App();
 const stage = app.node.tryGetContext('stage') || process.env.STAGE || 'dev';
 const domainName = app.node.tryGetContext('domainName') || process.env.DOMAIN_NAME || 'keeride.com';
 
-new AuthInfraStack(app, 'PortFolioAuthInfraStack', {
+new AuthInfraStack(app, `PortfolioAuthInfraStack-${stage}`, {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION || 'us-east-1',

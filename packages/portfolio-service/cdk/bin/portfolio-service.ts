@@ -7,7 +7,7 @@ const app = new cdk.App();
 
 const stage = app.node.tryGetContext('stage') || process.env.STAGE || 'dev';
 
-new PortfolioServiceStack(app, 'PortFolioServiceStack', {
+new PortfolioServiceStack(app, `PortfolioServiceStack-${stage}`, {
   stage,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT || '676206907471',

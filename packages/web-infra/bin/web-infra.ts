@@ -32,7 +32,7 @@ if (!domainName || domainName === '') {
 console.log(`Domain configured: ${domainName}`);
 console.log(`Stage: ${stage}`);
 
-new WebInfraStack(app, 'PortFolioWebInfraStack', {
+new WebInfraStack(app, `PortfolioWebInfraStack-${stage}`, {
   domainName,
   webSubdomain,
   apiDomainName: `${apiSubdomain}.${domainName}`,
