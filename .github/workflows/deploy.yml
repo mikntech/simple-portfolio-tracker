@@ -73,6 +73,7 @@ jobs:
 
           # Deploy portfolio service
           cd packages/portfolio-service/cdk
+          chmod +x deploy.sh
           STAGE=dev ./deploy.sh
           cd ../../..
 
@@ -201,6 +202,7 @@ jobs:
 
           # Deploy portfolio service
           cd packages/portfolio-service/cdk
+          chmod +x deploy.sh
           STAGE=prod ./deploy.sh
           cd ../../..
 
