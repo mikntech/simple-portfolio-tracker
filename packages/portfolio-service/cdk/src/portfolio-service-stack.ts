@@ -127,8 +127,40 @@ export class PortfolioBackendStack extends cdk.Stack {
       });
     };
 
-    // Note: OPTIONS methods are handled automatically by API Gateway's defaultCorsPreflightOptions
-    // configured in the base-infra stack. We don't need to add them explicitly.
+    // Create a reusable OPTIONS method configuration for CORS
+    // Using Mock integration to avoid Lambda invocation
+    const optionsIntegration = new apigateway.MockIntegration({
+      integrationResponses: [
+        {
+          statusCode: '200',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Headers':
+              "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+            'method.response.header.Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
+            'method.response.header.Access-Control-Allow-Origin': "'*'",
+            'method.response.header.Access-Control-Allow-Credentials': "'true'",
+          },
+        },
+      ],
+      passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
+      requestTemplates: {
+        'application/json': '{"statusCode": 200}',
+      },
+    });
+
+    const optionsMethodResponse = {
+      methodResponses: [
+        {
+          statusCode: '200',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Headers': true,
+            'method.response.header.Access-Control-Allow-Methods': true,
+            'method.response.header.Access-Control-Allow-Origin': true,
+            'method.response.header.Access-Control-Allow-Credentials': true,
+          },
+        },
+      ],
+    };
 
     const userHandlers = {
       create: createLambdaFunction('CreateUserFunction', {

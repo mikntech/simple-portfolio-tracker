@@ -46,6 +46,8 @@ export class BaseInfraStack extends cdk.Stack {
         dataTraceEnabled: true,
         loggingLevel: apigateway.MethodLoggingLevel.INFO,
         metricsEnabled: true,
+        // Force a new deployment by adding a deployment description with timestamp
+        description: `Deployment at ${new Date().toISOString()}`,
       },
       defaultCorsPreflightOptions: {
         allowOrigins: [
