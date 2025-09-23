@@ -46,7 +46,9 @@ export class PortfolioServiceStack extends cdk.Stack {
       partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
     });
 
-    const allocationsTable = new dynamodb.Table(this, 'AllocationsTable', {
+    // Changed logical ID to force table recreation with new indexes
+    // Old: AllocationsTable -> New: AllocationsTableV2
+    const allocationsTable = new dynamodb.Table(this, 'AllocationsTableV2', {
       tableName: `pt2-allocations-${stage}`,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -71,7 +73,9 @@ export class PortfolioServiceStack extends cdk.Stack {
       partitionKey: { name: 'symbol', type: dynamodb.AttributeType.STRING },
     });
 
-    const transactionsTable = new dynamodb.Table(this, 'TransactionsTable', {
+    // Changed logical ID to force table recreation with new indexes
+    // Old: TransactionsTable -> New: TransactionsTableV2
+    const transactionsTable = new dynamodb.Table(this, 'TransactionsTableV2', {
       tableName: `pt2-transactions-${stage}`,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
