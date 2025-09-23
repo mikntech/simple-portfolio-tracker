@@ -135,28 +135,38 @@ export class PortfolioBackendStack extends cdk.Stack {
           statusCode: '200',
           responseParameters: {
             'method.response.header.Access-Control-Allow-Headers':
-              "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-            'method.response.header.Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
+              "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-amz-user-agent'",
+            'method.response.header.Access-Control-Allow-Methods':
+              "'GET,POST,PUT,DELETE,OPTIONS,PATCH'",
             'method.response.header.Access-Control-Allow-Origin': "'*'",
             'method.response.header.Access-Control-Allow-Credentials': "'true'",
+            'method.response.header.Access-Control-Max-Age': "'86400'",
+          },
+          responseTemplates: {
+            'application/json': '',
           },
         },
       ],
-      passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
+      passthroughBehavior: apigateway.PassthroughBehavior.WHEN_NO_MATCH,
       requestTemplates: {
         'application/json': '{"statusCode": 200}',
       },
     });
 
     const optionsMethodResponse = {
+      authorizationType: apigateway.AuthorizationType.NONE, // Explicitly no auth for OPTIONS
       methodResponses: [
         {
           statusCode: '200',
+          responseModels: {
+            'application/json': apigateway.Model.EMPTY_MODEL,
+          },
           responseParameters: {
             'method.response.header.Access-Control-Allow-Headers': true,
             'method.response.header.Access-Control-Allow-Methods': true,
             'method.response.header.Access-Control-Allow-Origin': true,
             'method.response.header.Access-Control-Allow-Credentials': true,
+            'method.response.header.Access-Control-Max-Age': true,
           },
         },
       ],

@@ -49,24 +49,7 @@ export class BaseInfraStack extends cdk.Stack {
         // Force a new deployment by adding a deployment description with timestamp
         description: `Deployment at ${new Date().toISOString()}`,
       },
-      defaultCorsPreflightOptions: {
-        allowOrigins: [
-          'https://app.keeride.com',
-          'https://devapp.keeride.com',
-          'http://localhost:5173',
-          'http://localhost:3000',
-          'http://localhost:3001',
-        ],
-        allowMethods: apigateway.Cors.ALL_METHODS,
-        allowHeaders: [
-          'Content-Type',
-          'X-Amz-Date',
-          'Authorization',
-          'X-Api-Key',
-          'X-Amz-Security-Token',
-        ],
-        allowCredentials: true,
-      },
+      // Removed defaultCorsPreflightOptions - handling CORS manually in each stack
     });
 
     this.apiGateway.root.addMethod(
