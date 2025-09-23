@@ -94,32 +94,32 @@ export class BaseInfraStack extends cdk.Stack {
     });
 
     new ssm.StringParameter(this, 'HostedZoneIdParam', {
-      parameterName: '/portfolio-tracker/base/hosted-zone-id',
+      parameterName: '/portfolio-tracker/base/hosted-zone-id' + stage,
       stringValue: this.hostedZone.hostedZoneId,
     });
 
     new ssm.StringParameter(this, 'HostedZoneNameParam', {
-      parameterName: '/portfolio-tracker/base/hosted-zone-name',
+      parameterName: '/portfolio-tracker/base/hosted-zone-name' + stage,
       stringValue: this.hostedZone.zoneName,
     });
 
     new ssm.StringParameter(this, 'CertificateArnParam', {
-      parameterName: '/portfolio-tracker/base/certificate-arn',
+      parameterName: '/portfolio-tracker/base/certificate-arn' + stage,
       stringValue: this.certificate.certificateArn,
     });
 
     new ssm.StringParameter(this, 'ApiGatewayIdParam', {
-      parameterName: '/portfolio-tracker/base/api-gateway-id',
+      parameterName: '/portfolio-tracker/base/api-gateway-id' + stage,
       stringValue: this.apiGateway.restApiId,
     });
 
     new ssm.StringParameter(this, 'ApiGatewayRootResourceIdParam', {
-      parameterName: '/portfolio-tracker/base/api-gateway-root-resource-id',
+      parameterName: '/portfolio-tracker/base/api-gateway-root-resource-id' + stage,
       stringValue: this.apiGateway.root.resourceId,
     });
 
     new ssm.StringParameter(this, 'ApiDomainNameParam', {
-      parameterName: '/portfolio-tracker/base/api-domain-name',
+      parameterName: '/portfolio-tracker/base/api-domain-name' + stage,
       stringValue: `${apiSubdomain}.${domainName}`,
     });
 

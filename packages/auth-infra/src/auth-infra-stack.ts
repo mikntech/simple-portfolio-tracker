@@ -127,17 +127,17 @@ export class AuthInfraStack extends cdk.Stack {
 
     // Store values in SSM Parameter Store
     new ssm.StringParameter(this, 'UserPoolIdParam', {
-      parameterName: '/portfolio-tracker/auth/user-pool-id',
+      parameterName: '/portfolio-tracker/auth/user-pool-id' + props.stage,
       stringValue: this.userPool.userPoolId,
     });
 
     new ssm.StringParameter(this, 'UserPoolClientIdParam', {
-      parameterName: '/portfolio-tracker/auth/user-pool-client-id',
+      parameterName: '/portfolio-tracker/auth/user-pool-client-id' + props.stage,
       stringValue: this.userPoolClient.userPoolClientId,
     });
 
     new ssm.StringParameter(this, 'UserPoolDomainParam', {
-      parameterName: '/portfolio-tracker/auth/cognito-domain',
+      parameterName: '/portfolio-tracker/auth/cognito-domain' + props.stage,
       stringValue: `${this.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com`,
     });
 

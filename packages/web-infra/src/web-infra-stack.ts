@@ -173,17 +173,17 @@ export class WebInfraStack extends cdk.Stack {
 
     // Export values to SSM for CI/CD pipeline
     new ssm.StringParameter(this, 'WebBucketNameParam', {
-      parameterName: '/portfolio-tracker/web/bucket-name',
+      parameterName: '/portfolio-tracker/web/bucket-name' + stage,
       stringValue: this.webBucket.bucketName,
     });
 
     new ssm.StringParameter(this, 'DistributionIdParam', {
-      parameterName: '/portfolio-tracker/web/distribution-id',
+      parameterName: '/portfolio-tracker/web/distribution-id' + stage,
       stringValue: this.distribution.distributionId,
     });
 
     new ssm.StringParameter(this, 'WebDomainParam', {
-      parameterName: '/portfolio-tracker/web/domain',
+      parameterName: '/portfolio-tracker/web/domain' + stage,
       stringValue: `${webSubdomain}.${domainName}`,
     });
 
