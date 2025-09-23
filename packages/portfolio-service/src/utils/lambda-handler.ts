@@ -34,22 +34,8 @@ export function createHandler<TBody = any, TParams = any, TQuery = any>(
     const origin = event.headers.origin || event.headers.Origin || 'https://app.keeride.com';
 
     // List of allowed origins
-    const allowedOrigins = [
-      'https://app.keeride.com',
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'http://localhost:3001',
-    ];
-    const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
-
-    // Log CORS details
-    console.log('[CORS Debug]', {
-      requestOrigin: origin,
-      selectedCorsOrigin: corsOrigin,
-      isAllowedOrigin: allowedOrigins.includes(origin),
-      httpMethod: event.httpMethod,
-      headers: event.headers,
-    });
+    const allowedOrigins = ['http://localhost:3000'];
+    const corsOrigin = allowedOrigins[0];
 
     const headers = {
       'Content-Type': 'application/json',
