@@ -16,13 +16,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const userId = event.pathParameters?.id;
 
     if (!userId) {
-      return createApiResponse(400, {
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'User ID is required',
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'User ID is required',
+          },
         },
-      });
+        event
+      );
     }
 
     // Delete user
@@ -126,18 +130,26 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       }
     }
 
-    return createApiResponse(200, {
-      success: true,
-      data: { message: 'User and related data deleted successfully' },
-    });
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: { message: 'User and related data deleted successfully' },
+      },
+      event
+    );
   } catch (error) {
     console.error('Error deleting user:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: {
-        code: 'DELETE_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to delete user',
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: {
+          code: 'DELETE_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to delete user',
+        },
       },
-    });
+      event
+    );
   }
 };

@@ -11,13 +11,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const symbol = event.pathParameters?.symbol;
 
     if (!symbol) {
-      return createApiResponse(400, {
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'Symbol is required',
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'Symbol is required',
+          },
         },
-      });
+        event
+      );
     }
 
     // Query by symbol using the GSI
@@ -33,28 +37,40 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
 
     if (!result.Items || result.Items.length === 0) {
-      return createApiResponse(404, {
-        success: false,
-        error: {
-          code: 'NOT_FOUND',
-          message: 'Asset not found',
+      return createApiResponse(
+        404,
+        {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: 'Asset not found',
+          },
         },
-      });
+        event
+      );
     }
 
     // Return the first item (symbols should be unique)
-    return createApiResponse(200, {
-      success: true,
-      data: result.Items[0],
-    });
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: result.Items[0],
+      },
+      event
+    );
   } catch (error) {
     console.error('Error getting asset by symbol:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: {
-        code: 'GET_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to get asset',
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: {
+          code: 'GET_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to get asset',
+        },
       },
-    });
+      event
+    );
   }
 };

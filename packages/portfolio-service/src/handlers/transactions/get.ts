@@ -11,13 +11,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const transactionId = event.pathParameters?.id;
 
     if (!transactionId) {
-      return createApiResponse(400, {
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'Transaction ID is required',
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'Transaction ID is required',
+          },
         },
-      });
+        event
+      );
     }
 
     const result = await docClient.send(
@@ -28,30 +32,42 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
 
     if (!result.Item) {
-      return createApiResponse(404, {
-        success: false,
-        error: {
-          code: 'NOT_FOUND',
-          message: 'Transaction not found',
+      return createApiResponse(
+        404,
+        {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: 'Transaction not found',
+          },
         },
-      });
+        event
+      );
     }
 
-    return createApiResponse(200, {
-      success: true,
-      data: {
-        ...result.Item,
-        executedAt: result.Item.executedAt ? new Date(result.Item.executedAt) : undefined,
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: {
+          ...result.Item,
+          executedAt: result.Item.executedAt ? new Date(result.Item.executedAt) : undefined,
+        },
       },
-    });
+      event
+    );
   } catch (error) {
     console.error('Error getting transaction:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: {
-        code: 'GET_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to get transaction',
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: {
+          code: 'GET_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to get transaction',
+        },
       },
-    });
+      event
+    );
   }
 };

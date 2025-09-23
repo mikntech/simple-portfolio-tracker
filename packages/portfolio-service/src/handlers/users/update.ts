@@ -13,13 +13,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const body = JSON.parse(event.body || '{}');
 
     if (!userId) {
-      return createApiResponse(400, {
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'User ID is required',
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'User ID is required',
+          },
         },
-      });
+        event
+      );
     }
 
     const validated = CreateUserSchema.partial().parse(body);
@@ -42,13 +46,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         existingUser.Items.length > 0 &&
         existingUser.Items[0].id !== userId
       ) {
-        return createApiResponse(409, {
-          success: false,
-          error: {
-            code: 'EMAIL_EXISTS',
-            message: 'User with this email already exists',
+        return createApiResponse(
+          409,
+          {
+            success: false,
+            error: {
+              code: 'EMAIL_EXISTS',
+              message: 'User with this email already exists',
+            },
           },
-        });
+          event
+        );
       }
     }
 
@@ -82,22 +90,30 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })
     );
 
-    return createApiResponse(200, {
-      success: true,
-      data: {
-        ...result.Attributes,
-        createdAt: new Date(result.Attributes!.createdAt),
-        updatedAt: new Date(result.Attributes!.updatedAt),
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: {
+          ...result.Attributes,
+          createdAt: new Date(result.Attributes!.createdAt),
+          updatedAt: new Date(result.Attributes!.updatedAt),
+        },
       },
-    });
+      event
+    );
   } catch (error) {
     console.error('Error updating user:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: {
-        code: 'UPDATE_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to update user',
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: {
+          code: 'UPDATE_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to update user',
+        },
       },
-    });
+      event
+    );
   }
 };

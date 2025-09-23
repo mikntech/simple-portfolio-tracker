@@ -9,35 +9,43 @@ const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-    const portfolioId = event.pathParameters?.portfolioId;
+    const userId = event.pathParameters?.id;
     const assetId = event.pathParameters?.assetId;
 
-    if (!portfolioId || !assetId) {
-      return createApiResponse(400, {
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'Portfolio ID and Asset ID are required',
+    if (!userId || !assetId) {
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'User ID and Asset ID are required',
+          },
         },
-      });
+        event
+      );
     }
 
-    // Verify portfolio exists
-    const portfolioResult = await docClient.send(
+    // Verify user exists
+    const userResult = await docClient.send(
       new GetCommand({
-        TableName: process.env.PORTFOLIOS_TABLE!,
-        Key: { id: portfolioId },
+        TableName: process.env.USERS_TABLE!,
+        Key: { id: userId },
       })
     );
 
-    if (!portfolioResult.Item) {
-      return createApiResponse(404, {
-        success: false,
-        error: {
-          code: 'NOT_FOUND',
-          message: 'Portfolio not found',
+    if (!userResult.Item) {
+      return createApiResponse(
+        404,
+        {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: 'User not found',
+          },
         },
-      });
+        event
+      );
     }
 
     // Get asset details
@@ -49,13 +57,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
 
     if (!assetResult.Item) {
-      return createApiResponse(404, {
-        success: false,
-        error: {
-          code: 'NOT_FOUND',
-          message: 'Asset not found',
+      return createApiResponse(
+        404,
+        {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: 'Asset not found',
+          },
         },
-      });
+        event
+      );
     }
 
     const asset = assetResult.Item as Asset;
@@ -64,10 +76,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const transactionsResult = await docClient.send(
       new QueryCommand({
         TableName: process.env.TRANSACTIONS_TABLE!,
-        IndexName: 'portfolioId-assetId-index',
-        KeyConditionExpression: 'portfolioId = :portfolioId AND assetId = :assetId',
+        IndexName: 'userId-assetId-index',
+        KeyConditionExpression: 'userId = :userId AND assetId = :assetId',
         ExpressionAttributeValues: {
-          ':portfolioId': portfolioId,
+          ':userId': userId,
           ':assetId': assetId,
         },
       })
@@ -102,13 +114,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     // If no position, return 404
     if (holding.quantity === 0) {
-      return createApiResponse(404, {
-        success: false,
-        error: {
-          code: 'NOT_FOUND',
-          message: 'No holding found for this asset',
+      return createApiResponse(
+        404,
+        {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: 'No holding found for this asset',
+          },
         },
-      });
+        event
+      );
     }
 
     // Mock current price (in production, fetch from market data API)
@@ -117,18 +133,26 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     holding.unrealizedGainLoss = holding.currentValue - holding.totalCost;
     holding.unrealizedGainLossPercent = (holding.unrealizedGainLoss / holding.totalCost) * 100;
 
-    return createApiResponse(200, {
-      success: true,
-      data: holding,
-    });
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: holding,
+      },
+      event
+    );
   } catch (error) {
     console.error('Error getting holding:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: {
-        code: 'GET_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to get holding',
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: {
+          code: 'GET_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to get holding',
+        },
       },
-    });
+      event
+    );
   }
 };

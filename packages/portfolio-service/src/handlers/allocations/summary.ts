@@ -13,37 +13,45 @@ const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-    const portfolioId = event.pathParameters?.portfolioId;
-    if (!portfolioId) {
-      return createApiResponse(400, {
-        success: false,
-        error: { code: 'MISSING_PORTFOLIO_ID', message: 'Portfolio ID is required' },
-      });
+    const userId = event.pathParameters?.id;
+    if (!userId) {
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: { code: 'MISSING_USER_ID', message: 'User ID is required' },
+        },
+        event
+      );
     }
 
-    // Get portfolio
-    const portfolioResult = await docClient.send(
+    // Get user to verify they exist
+    const userResult = await docClient.send(
       new GetCommand({
-        TableName: process.env.PORTFOLIOS_TABLE!,
-        Key: { id: portfolioId },
+        TableName: process.env.USERS_TABLE!,
+        Key: { id: userId },
       })
     );
 
-    if (!portfolioResult.Item) {
-      return createApiResponse(404, {
-        success: false,
-        error: { code: 'PORTFOLIO_NOT_FOUND', message: 'Portfolio not found' },
-      });
+    if (!userResult.Item) {
+      return createApiResponse(
+        404,
+        {
+          success: false,
+          error: { code: 'USER_NOT_FOUND', message: 'User not found' },
+        },
+        event
+      );
     }
 
     // Get allocations
     const allocationsResult = await docClient.send(
       new QueryCommand({
         TableName: process.env.ALLOCATIONS_TABLE!,
-        IndexName: 'portfolioId-index',
-        KeyConditionExpression: 'portfolioId = :portfolioId',
+        IndexName: 'userId-index',
+        KeyConditionExpression: 'userId = :userId',
         ExpressionAttributeValues: {
-          ':portfolioId': portfolioId,
+          ':userId': userId,
         },
       })
     );
@@ -54,10 +62,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const transactionsResult = await docClient.send(
       new QueryCommand({
         TableName: process.env.TRANSACTIONS_TABLE!,
-        IndexName: 'portfolioId-executedAt-index',
-        KeyConditionExpression: 'portfolioId = :portfolioId',
+        IndexName: 'userId-index',
+        KeyConditionExpression: 'userId = :userId',
         ExpressionAttributeValues: {
-          ':portfolioId': portfolioId,
+          ':userId': userId,
         },
       })
     );
@@ -138,21 +146,29 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       0
     );
 
-    return createApiResponse(200, {
-      success: true,
-      data: {
-        portfolioId,
-        allocations: allocationSummary,
-        totalTargetPercentage,
-        totalValue,
-        lastUpdated: new Date().toISOString(),
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: {
+          userId,
+          allocations: allocationSummary,
+          totalTargetPercentage,
+          totalValue,
+          lastUpdated: new Date().toISOString(),
+        },
       },
-    });
+      event
+    );
   } catch (error) {
     console.error('Error getting allocation summary:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: { code: 'SUMMARY_FAILED', message: 'Failed to get allocation summary' },
-    });
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: { code: 'SUMMARY_FAILED', message: 'Failed to get allocation summary' },
+      },
+      event
+    );
   }
 };

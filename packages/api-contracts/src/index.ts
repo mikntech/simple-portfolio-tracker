@@ -45,40 +45,6 @@ export const UserApiContracts = {
   },
 };
 
-// Portfolio API contracts
-export const PortfolioApiContracts = {
-  listPortfolios: {
-    method: 'GET' as const,
-    path: '/portfolios',
-    query: z.object({
-      userId: z.string().uuid(),
-    }),
-    response: ApiResponseSchema(
-      z.array(
-        z.object({
-          id: z.string().uuid(),
-          userId: z.string().uuid(),
-          name: z.string(),
-          createdAt: z.string(),
-          updatedAt: z.string(),
-        })
-      )
-    ),
-  },
-  deletePortfolio: {
-    method: 'DELETE' as const,
-    path: '/portfolios/:id',
-    params: z.object({ id: z.string().uuid() }),
-    response: ApiResponseSchema(z.object({ message: z.string() })),
-  },
-  getPortfolioSummary: {
-    method: 'GET' as const,
-    path: '/portfolios/:id/summary',
-    params: z.object({ id: z.string().uuid() }),
-    response: ApiResponseSchema(PortfolioSummarySchema),
-  },
-};
-
 // Asset API contracts
 export const AssetApiContracts = {
   searchAssets: {
@@ -153,13 +119,13 @@ export const TransactionApiContracts = {
 export const HoldingsApiContracts = {
   getPortfolioHoldings: {
     method: 'GET' as const,
-    path: '/portfolios/:portfolioId/holdings',
+    path: '/holdings',
     params: z.object({ portfolioId: z.string().uuid() }),
     response: ApiResponseSchema(z.array(HoldingSchema)),
   },
   getAssetHolding: {
     method: 'GET' as const,
-    path: '/portfolios/:portfolioId/holdings/:assetId',
+    path: '/holdings/:assetId',
     params: z.object({
       portfolioId: z.string().uuid(),
       assetId: z.string().uuid(),
@@ -178,7 +144,7 @@ export const AllocationApiContracts = {
   },
   getAllocations: {
     method: 'GET' as const,
-    path: '/portfolios/:portfolioId/allocations',
+    path: '/allocations',
     params: z.object({ portfolioId: z.string().uuid() }),
     response: ApiResponseSchema(z.array(AllocationSchema)),
   },
@@ -197,7 +163,7 @@ export const AllocationApiContracts = {
   },
   getPortfolioAllocationSummary: {
     method: 'GET' as const,
-    path: '/portfolios/:portfolioId/allocation-summary',
+    path: '/allocation-summary',
     params: z.object({ portfolioId: z.string().uuid() }),
     response: ApiResponseSchema(PortfolioAllocationSummarySchema),
   },
@@ -206,7 +172,6 @@ export const AllocationApiContracts = {
 // Export all contracts
 export const ApiContracts = {
   users: UserApiContracts,
-  portfolios: PortfolioApiContracts,
   assets: AssetApiContracts,
   transactions: TransactionApiContracts,
   holdings: HoldingsApiContracts,

@@ -27,13 +27,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const { q, type, exchange, limit = '50' } = event.queryStringParameters || {};
 
     if (!q || q.trim().length === 0) {
-      return createApiResponse(400, {
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'Search query is required',
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'Search query is required',
+          },
         },
-      });
+        event
+      );
     }
 
     const searchQuery = q.toLowerCase();
@@ -104,18 +108,26 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     // Apply limit
     const paginatedAssets = filteredAssets.slice(0, limitNum);
 
-    return createApiResponse(200, {
-      success: true,
-      data: paginatedAssets,
-    });
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: paginatedAssets,
+      },
+      event
+    );
   } catch (error) {
     console.error('Error searching assets:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: {
-        code: 'SEARCH_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to search assets',
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: {
+          code: 'SEARCH_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to search assets',
+        },
       },
-    });
+      event
+    );
   }
 };

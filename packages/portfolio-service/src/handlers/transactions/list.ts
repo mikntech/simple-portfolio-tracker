@@ -10,7 +10,7 @@ const docClient = DynamoDBDocumentClient.from(dynamoClient);
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const {
-      portfolioId,
+      userId,
       assetId,
       type,
       startDate,
@@ -19,23 +19,27 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       limit = '20',
     } = event.queryStringParameters || {};
 
-    if (!portfolioId) {
-      return createApiResponse(400, {
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'Portfolio ID is required',
+    if (!userId) {
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'User ID is required',
+          },
         },
-      });
+        event
+      );
     }
 
     const pageNum = parseInt(page, 10);
     const limitNum = Math.min(parseInt(limit, 10), 100);
 
     // Build query parameters
-    let keyConditionExpression = 'portfolioId = :portfolioId';
+    let keyConditionExpression = 'userId = :userId';
     const expressionAttributeValues: Record<string, any> = {
-      ':portfolioId': portfolioId,
+      ':userId': userId,
     };
 
     // Use different index if filtering by assetId
@@ -45,11 +49,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     };
 
     if (assetId) {
-      queryParams.IndexName = 'portfolioId-assetId-index';
+      queryParams.IndexName = 'userId-assetId-index';
       keyConditionExpression += ' AND assetId = :assetId';
       expressionAttributeValues[':assetId'] = assetId;
     } else {
-      queryParams.IndexName = 'portfolioId-index';
+      queryParams.IndexName = 'userId-index';
     }
 
     // Add filters
@@ -95,26 +99,34 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const startIndex = (pageNum - 1) * limitNum;
     const paginatedTransactions = transformedTransactions.slice(startIndex, startIndex + limitNum);
 
-    return createApiResponse(200, {
-      success: true,
-      data: {
-        items: paginatedTransactions,
-        pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total: transactions.length,
-          totalPages: Math.ceil(transactions.length / limitNum),
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: {
+          items: paginatedTransactions,
+          pagination: {
+            page: pageNum,
+            limit: limitNum,
+            total: transactions.length,
+            totalPages: Math.ceil(transactions.length / limitNum),
+          },
         },
       },
-    });
+      event
+    );
   } catch (error) {
     console.error('Error listing transactions:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: {
-        code: 'LIST_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to list transactions',
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: {
+          code: 'LIST_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to list transactions',
+        },
       },
-    });
+      event
+    );
   }
 };

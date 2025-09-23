@@ -11,10 +11,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     const id = event.pathParameters?.id;
     if (!id) {
-      return createApiResponse(400, {
-        success: false,
-        error: { code: 'MISSING_ID', message: 'Allocation ID is required' },
-      });
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: { code: 'MISSING_ID', message: 'Allocation ID is required' },
+        },
+        event
+      );
     }
 
     const body = JSON.parse(event.body || '{}');
@@ -33,15 +37,19 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })
     );
 
-    return createApiResponse(200, { success: true, data: result.Attributes });
+    return createApiResponse(200, { success: true, data: result.Attributes }, event);
   } catch (error) {
     console.error('Error updating allocation:', error);
-    return createApiResponse(400, {
-      success: false,
-      error: {
-        code: 'UPDATE_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to update allocation',
+    return createApiResponse(
+      400,
+      {
+        success: false,
+        error: {
+          code: 'UPDATE_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to update allocation',
+        },
       },
-    });
+      event
+    );
   }
 };

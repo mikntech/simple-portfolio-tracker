@@ -22,49 +22,61 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
 
     if (!assetResult.Item) {
-      return createApiResponse(404, {
-        success: false,
-        error: {
-          code: 'ASSET_NOT_FOUND',
-          message: 'Asset not found',
+      return createApiResponse(
+        404,
+        {
+          success: false,
+          error: {
+            code: 'ASSET_NOT_FOUND',
+            message: 'Asset not found',
+          },
         },
-      });
+        event
+      );
     }
 
-    // For simplified backend, derive portfolioId from the request
-    const portfolioId = body.portfolioId;
-    if (!portfolioId) {
-      return createApiResponse(400, {
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'Portfolio ID is required',
+    // Get userId from the request
+    const userId = body.userId;
+    if (!userId) {
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'User ID is required',
+          },
         },
-      });
+        event
+      );
     }
 
-    // Verify portfolio exists
-    const portfolioResult = await docClient.send(
+    // Verify user exists
+    const userResult = await docClient.send(
       new GetCommand({
-        TableName: process.env.PORTFOLIOS_TABLE!,
-        Key: { id: portfolioId },
+        TableName: process.env.USERS_TABLE!,
+        Key: { id: userId },
       })
     );
 
-    if (!portfolioResult.Item) {
-      return createApiResponse(404, {
-        success: false,
-        error: {
-          code: 'PORTFOLIO_NOT_FOUND',
-          message: 'Portfolio not found',
+    if (!userResult.Item) {
+      return createApiResponse(
+        404,
+        {
+          success: false,
+          error: {
+            code: 'USER_NOT_FOUND',
+            message: 'User not found',
+          },
         },
-      });
+        event
+      );
     }
 
     const transaction = {
       ...validated,
       id: uuidv4(),
-      portfolioId,
+      userId,
       executedAt: validated.executedAt
         ? new Date(validated.executedAt).toISOString()
         : new Date().toISOString(),
@@ -79,21 +91,29 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })
     );
 
-    return createApiResponse(201, {
-      success: true,
-      data: {
-        ...transaction,
-        executedAt: transaction.executedAt ? new Date(transaction.executedAt) : undefined,
+    return createApiResponse(
+      201,
+      {
+        success: true,
+        data: {
+          ...transaction,
+          executedAt: transaction.executedAt ? new Date(transaction.executedAt) : undefined,
+        },
       },
-    });
+      event
+    );
   } catch (error) {
     console.error('Error creating transaction:', error);
-    return createApiResponse(400, {
-      success: false,
-      error: {
-        code: 'CREATE_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to create transaction',
+    return createApiResponse(
+      400,
+      {
+        success: false,
+        error: {
+          code: 'CREATE_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to create transaction',
+        },
       },
-    });
+      event
+    );
   }
 };

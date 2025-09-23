@@ -11,13 +11,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const transactionId = event.pathParameters?.id;
 
     if (!transactionId) {
-      return createApiResponse(400, {
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'Transaction ID is required',
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'Transaction ID is required',
+          },
         },
-      });
+        event
+      );
     }
 
     await docClient.send(
@@ -27,18 +31,26 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })
     );
 
-    return createApiResponse(200, {
-      success: true,
-      data: { message: 'Transaction deleted successfully' },
-    });
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: { message: 'Transaction deleted successfully' },
+      },
+      event
+    );
   } catch (error) {
     console.error('Error deleting transaction:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: {
-        code: 'DELETE_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to delete transaction',
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: {
+          code: 'DELETE_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to delete transaction',
+        },
       },
-    });
+      event
+    );
   }
 };

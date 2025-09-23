@@ -13,13 +13,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const body = JSON.parse(event.body || '{}');
 
     if (!transactionId) {
-      return createApiResponse(400, {
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'Transaction ID is required',
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'Transaction ID is required',
+          },
         },
-      });
+        event
+      );
     }
 
     const validated = CreateTransactionSchema.partial().parse(body);
@@ -34,13 +38,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       );
 
       if (!assetResult.Item) {
-        return createApiResponse(404, {
-          success: false,
-          error: {
-            code: 'ASSET_NOT_FOUND',
-            message: 'Asset not found',
+        return createApiResponse(
+          404,
+          {
+            success: false,
+            error: {
+              code: 'ASSET_NOT_FOUND',
+              message: 'Asset not found',
+            },
           },
-        });
+          event
+        );
       }
     }
 
@@ -89,23 +97,31 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })
     );
 
-    return createApiResponse(200, {
-      success: true,
-      data: {
-        ...result.Attributes,
-        executedAt: result.Attributes!.executedAt
-          ? new Date(result.Attributes!.executedAt)
-          : undefined,
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: {
+          ...result.Attributes,
+          executedAt: result.Attributes!.executedAt
+            ? new Date(result.Attributes!.executedAt)
+            : undefined,
+        },
       },
-    });
+      event
+    );
   } catch (error) {
     console.error('Error updating transaction:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: {
-        code: 'UPDATE_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to update transaction',
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: {
+          code: 'UPDATE_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to update transaction',
+        },
       },
-    });
+      event
+    );
   }
 };

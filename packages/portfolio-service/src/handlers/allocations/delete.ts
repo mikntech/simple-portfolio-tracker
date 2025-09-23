@@ -10,10 +10,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     const id = event.pathParameters?.id;
     if (!id) {
-      return createApiResponse(400, {
-        success: false,
-        error: { code: 'MISSING_ID', message: 'Allocation ID is required' },
-      });
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: { code: 'MISSING_ID', message: 'Allocation ID is required' },
+        },
+        event
+      );
     }
 
     await docClient.send(
@@ -23,15 +27,23 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })
     );
 
-    return createApiResponse(200, {
-      success: true,
-      data: { message: 'Allocation deleted successfully' },
-    });
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: { message: 'Allocation deleted successfully' },
+      },
+      event
+    );
   } catch (error) {
     console.error('Error deleting allocation:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: { code: 'DELETE_FAILED', message: 'Failed to delete allocation' },
-    });
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: { code: 'DELETE_FAILED', message: 'Failed to delete allocation' },
+      },
+      event
+    );
   }
 };

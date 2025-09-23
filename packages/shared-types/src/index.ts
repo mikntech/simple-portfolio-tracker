@@ -146,9 +146,9 @@ export const UpdateAllocationSchema = z.object({
 
 export type UpdateAllocation = z.infer<typeof UpdateAllocationSchema>;
 
-// Portfolio allocation summary
+// User allocation summary
 export const PortfolioAllocationSummarySchema = z.object({
-  portfolioId: z.string().uuid(),
+  userId: z.string().uuid(),
   allocations: z.array(
     z.object({
       assetId: z.string().uuid(),
@@ -162,7 +162,8 @@ export const PortfolioAllocationSummarySchema = z.object({
     })
   ),
   totalTargetPercentage: z.number(),
-  lastUpdated: z.date(),
+  totalValue: z.number(),
+  lastUpdated: z.string(), // Changed to string to match handler
 });
 
 export type PortfolioAllocationSummary = z.infer<typeof PortfolioAllocationSummarySchema>;

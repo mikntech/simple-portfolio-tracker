@@ -14,44 +14,52 @@ const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-    const portfolioId = event.pathParameters?.portfolioId;
+    const userId = event.pathParameters?.id;
 
-    if (!portfolioId) {
-      return createApiResponse(400, {
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'Portfolio ID is required',
+    if (!userId) {
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'User ID is required',
+          },
         },
-      });
+        event
+      );
     }
 
-    // Verify portfolio exists
-    const portfolioResult = await docClient.send(
+    // Verify user exists
+    const userResult = await docClient.send(
       new GetCommand({
-        TableName: process.env.PORTFOLIOS_TABLE!,
-        Key: { id: portfolioId },
+        TableName: process.env.USERS_TABLE!,
+        Key: { id: userId },
       })
     );
 
-    if (!portfolioResult.Item) {
-      return createApiResponse(404, {
-        success: false,
-        error: {
-          code: 'NOT_FOUND',
-          message: 'Portfolio not found',
+    if (!userResult.Item) {
+      return createApiResponse(
+        404,
+        {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: 'User not found',
+          },
         },
-      });
+        event
+      );
     }
 
-    // Get all transactions for the portfolio
+    // Get all transactions for the user
     const transactionsResult = await docClient.send(
       new QueryCommand({
         TableName: process.env.TRANSACTIONS_TABLE!,
-        IndexName: 'portfolioId-index',
-        KeyConditionExpression: 'portfolioId = :portfolioId',
+        IndexName: 'userId-index',
+        KeyConditionExpression: 'userId = :userId',
         ExpressionAttributeValues: {
-          ':portfolioId': portfolioId,
+          ':userId': userId,
         },
       })
     );
@@ -119,18 +127,26 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       }
     }
 
-    return createApiResponse(200, {
-      success: true,
-      data: holdings,
-    });
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: holdings,
+      },
+      event
+    );
   } catch (error) {
     console.error('Error listing holdings:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: {
-        code: 'LIST_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to list holdings',
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: {
+          code: 'LIST_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to list holdings',
+        },
       },
-    });
+      event
+    );
   }
 };

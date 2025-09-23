@@ -8,32 +8,40 @@ const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-    const portfolioId = event.pathParameters?.portfolioId;
+    const userId = event.pathParameters?.id;
 
-    if (!portfolioId) {
-      return createApiResponse(400, {
-        success: false,
-        error: { code: 'MISSING_PORTFOLIO_ID', message: 'Portfolio ID is required' },
-      });
+    if (!userId) {
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: { code: 'MISSING_USER_ID', message: 'User ID is required' },
+        },
+        event
+      );
     }
 
     const result = await docClient.send(
       new QueryCommand({
         TableName: process.env.ALLOCATIONS_TABLE!,
-        IndexName: 'portfolioId-index',
-        KeyConditionExpression: 'portfolioId = :portfolioId',
+        IndexName: 'userId-index',
+        KeyConditionExpression: 'userId = :userId',
         ExpressionAttributeValues: {
-          ':portfolioId': portfolioId,
+          ':userId': userId,
         },
       })
     );
 
-    return createApiResponse(200, { success: true, data: result.Items || [] });
+    return createApiResponse(200, { success: true, data: result.Items || [] }, event);
   } catch (error) {
     console.error('Error listing allocations:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: { code: 'LIST_FAILED', message: 'Failed to list allocations' },
-    });
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: { code: 'LIST_FAILED', message: 'Failed to list allocations' },
+      },
+      event
+    );
   }
 };

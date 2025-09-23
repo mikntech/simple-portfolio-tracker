@@ -11,13 +11,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const assetId = event.pathParameters?.id;
 
     if (!assetId) {
-      return createApiResponse(400, {
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'Asset ID is required',
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'Asset ID is required',
+          },
         },
-      });
+        event
+      );
     }
 
     const result = await docClient.send(
@@ -28,27 +32,39 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
 
     if (!result.Item) {
-      return createApiResponse(404, {
-        success: false,
-        error: {
-          code: 'NOT_FOUND',
-          message: 'Asset not found',
+      return createApiResponse(
+        404,
+        {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: 'Asset not found',
+          },
         },
-      });
+        event
+      );
     }
 
-    return createApiResponse(200, {
-      success: true,
-      data: result.Item,
-    });
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: result.Item,
+      },
+      event
+    );
   } catch (error) {
     console.error('Error getting asset:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: {
-        code: 'GET_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to get asset',
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: {
+          code: 'GET_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to get asset',
+        },
       },
-    });
+      event
+    );
   }
 };

@@ -27,15 +27,19 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })
     );
 
-    return createApiResponse(201, { success: true, data: allocation });
+    return createApiResponse(201, { success: true, data: allocation }, event);
   } catch (error) {
     console.error('Error creating allocation:', error);
-    return createApiResponse(400, {
-      success: false,
-      error: {
-        code: 'CREATE_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to create allocation',
+    return createApiResponse(
+      400,
+      {
+        success: false,
+        error: {
+          code: 'CREATE_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to create allocation',
+        },
       },
-    });
+      event
+    );
   }
 };
