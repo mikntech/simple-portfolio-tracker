@@ -154,10 +154,10 @@ export function CSVUpload({ portfolioId, onSuccess, onCancel }: CSVUploadProps) 
       }
 
       // Create transactions with resolved asset IDs
-      const transactions: (CreateTransaction & { portfolioId: string })[] = preview
+      const transactions: (CreateTransaction & { userId: string })[] = preview
         .filter((row) => assetMap.has(row.symbol))
         .map((row) => ({
-          portfolioId,
+          userId: portfolioId,
           assetId: assetMap.get(row.symbol)!,
           type: row.type,
           quantity: row.quantity,

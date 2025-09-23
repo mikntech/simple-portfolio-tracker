@@ -34,7 +34,7 @@ export function TransactionForm({ portfolioId, onSuccess, onCancel }: Transactio
 
     try {
       await createTransaction.mutateAsync({
-        portfolioId,
+        userId: portfolioId,
         assetId: selectedAsset.id,
         type: formData.type,
         quantity: parseFloat(formData.quantity),
