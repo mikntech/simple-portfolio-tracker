@@ -73,7 +73,7 @@ jobs:
 
           # Deploy portfolio service
           cd packages/portfolio-service/cdk
-          STAGE=dev pnpm run cdk deploy -- --require-approval never
+          STAGE=dev ./deploy.sh
           cd ../../..
 
           # Deploy web infrastructure
@@ -201,7 +201,7 @@ jobs:
 
           # Deploy portfolio service
           cd packages/portfolio-service/cdk
-          STAGE=prod pnpm run cdk deploy -- --require-approval never
+          STAGE=prod ./deploy.sh
           cd ../../..
 
           # Deploy web infrastructure

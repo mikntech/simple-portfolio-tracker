@@ -1,2 +1,3 @@
 packages:
   - 'packages/*'
+  - 'packages/portfolio-service/cdk'
