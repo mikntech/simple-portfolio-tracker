@@ -8,12 +8,18 @@ const app = new cdk.App();
 // Get configuration from context or environment
 const rawDomainName = app.node.tryGetContext('domainName') || process.env.DOMAIN_NAME;
 const domainName = rawDomainName?.trim();
-const apiSubdomain = app.node.tryGetContext('apiSubdomain') || 'api';
-const webSubdomain = app.node.tryGetContext('webSubdomain') || 'app';
+const stage = app.node.tryGetContext('stage') || process.env.STAGE || 'dev';
+
+// Generate subdomains based on stage
+const apiSubdomain =
+  app.node.tryGetContext('apiSubdomain') || (stage !== 'prod' ? stage : '') + 'api';
+const webSubdomain =
+  app.node.tryGetContext('webSubdomain') || (stage !== 'prod' ? stage : '') + 'app';
 
 // Debug logging
 console.log('Debug - Context domainName:', app.node.tryGetContext('domainName'));
 console.log('Debug - Environment DOMAIN_NAME:', process.env.DOMAIN_NAME);
+console.log('Debug - Stage:', stage);
 console.log('Debug - Final domainName:', domainName);
 
 if (!domainName || domainName === '') {
@@ -24,14 +30,16 @@ if (!domainName || domainName === '') {
 }
 
 console.log(`Domain configured: ${domainName}`);
+console.log(`Stage: ${stage}`);
 
 new WebInfraStack(app, 'WebInfraStack', {
   domainName,
   webSubdomain,
   apiDomainName: `${apiSubdomain}.${domainName}`,
+  stage,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT || '676206907471',
     region: process.env.CDK_DEFAULT_REGION || 'us-east-1', // CloudFront requires us-east-1
   },
-  description: 'Portfolio Tracker Web Infrastructure - S3, CloudFront',
+  description: `Portfolio Tracker Web Infrastructure - S3, CloudFront (${stage})`,
 });

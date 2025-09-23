@@ -9,6 +9,7 @@ export interface BaseInfraStackProps extends cdk.StackProps {
   domainName: string;
   apiSubdomain?: string;
   webSubdomain?: string;
+  stage: string;
 }
 
 export class BaseInfraStack extends cdk.Stack {
@@ -20,14 +21,12 @@ export class BaseInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: BaseInfraStackProps) {
     super(scope, id, props);
 
-    const { domainName, apiSubdomain = 'api', webSubdomain = 'app' } = props;
+    const { domainName, apiSubdomain = 'api', webSubdomain = 'app', stage } = props;
 
-    // Look up or create hosted zone
     this.hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
       domainName,
     });
 
-    // Create wildcard certificate for the domain
     this.certificate = new acm.Certificate(this, 'Certificate', {
       domainName: domainName,
       subjectAlternativeNames: [
@@ -38,12 +37,11 @@ export class BaseInfraStack extends cdk.Stack {
       validation: acm.CertificateValidation.fromDns(this.hostedZone),
     });
 
-    // Create API Gateway
     this.apiGateway = new apigateway.RestApi(this, 'ApiGateway', {
       restApiName: 'portfolio-tracker-api',
       description: 'Portfolio Tracker API Gateway',
       deployOptions: {
-        stageName: 'prod',
+        stageName: stage,
         tracingEnabled: true,
         dataTraceEnabled: true,
         loggingLevel: apigateway.MethodLoggingLevel.INFO,
@@ -51,7 +49,6 @@ export class BaseInfraStack extends cdk.Stack {
       },
     });
 
-    // Add a root resource to prevent validation errors
     this.apiGateway.root.addMethod(
       'GET',
       new apigateway.MockIntegration({
@@ -59,7 +56,7 @@ export class BaseInfraStack extends cdk.Stack {
           {
             statusCode: '200',
             responseTemplates: {
-              'application/json': '{"message": "Portfolio Tracker API"}',
+              'application/json': `{"message": "Portfolio Tracker API ${stage}"}`,
             },
           },
         ],
@@ -76,7 +73,6 @@ export class BaseInfraStack extends cdk.Stack {
       }
     );
 
-    // Create custom domain for API Gateway
     this.apiDomainName = new apigateway.DomainName(this, 'ApiDomainName', {
       domainName: `${apiSubdomain}.${domainName}`,
       certificate: this.certificate,
@@ -84,13 +80,11 @@ export class BaseInfraStack extends cdk.Stack {
       securityPolicy: apigateway.SecurityPolicy.TLS_1_2,
     });
 
-    // Map domain to API Gateway
     new apigateway.BasePathMapping(this, 'ApiBasePathMapping', {
       domainName: this.apiDomainName,
       restApi: this.apiGateway,
     });
 
-    // Create Route53 record for API
     new route53.ARecord(this, 'ApiARecord', {
       zone: this.hostedZone,
       recordName: apiSubdomain,
@@ -99,7 +93,6 @@ export class BaseInfraStack extends cdk.Stack {
       ),
     });
 
-    // Export values to SSM for other stacks to use
     new ssm.StringParameter(this, 'HostedZoneIdParam', {
       parameterName: '/portfolio-tracker/base/hosted-zone-id',
       stringValue: this.hostedZone.hostedZoneId,
@@ -130,7 +123,6 @@ export class BaseInfraStack extends cdk.Stack {
       stringValue: `${apiSubdomain}.${domainName}`,
     });
 
-    // Output values
     new cdk.CfnOutput(this, 'HostedZoneId', {
       value: this.hostedZone.hostedZoneId,
       description: 'Hosted Zone ID',

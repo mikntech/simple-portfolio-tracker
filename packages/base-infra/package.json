@@ -6,7 +6,6 @@
     "build": "tsc",
     "cdk": "cdk",
     "deploy": "cdk deploy --all --require-approval never",
-    "deploy:script": "./deploy.sh",
     "diff": "cdk diff",
     "synth": "cdk synth"
   },

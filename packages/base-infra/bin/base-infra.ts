@@ -5,24 +5,42 @@ import { BaseInfraStack } from '../src/base-infra-stack';
 
 const app = new cdk.App();
 
-const rawDomainName = app.node.tryGetContext('domainName') || process.env.DOMAIN_NAME;
-const domainName = rawDomainName?.trim();
+const getEnvFromGACIC = ({
+  name,
+  camelCase,
+  UPPER_CASE,
+}: {
+  name: string;
+  camelCase: string;
+  UPPER_CASE: string;
+}) => {
+  const rawValue = app.node.tryGetContext(camelCase) || process.env[UPPER_CASE];
+  const value = rawValue?.trim();
 
-if (!domainName || domainName === '') {
-  console.error('Error: Domain name is empty or not provided');
-  console.error('Please ensure DOMAIN_NAME secret is properly set in GitHub');
-  throw new Error(
-    'Domain name must be provided via context (-c domainName=example.com) or DOMAIN_NAME environment variable'
-  );
-}
+  if (!value || value === '') {
+    console.error(`Error: ${name} is empty or not provided`);
+    console.error(`Please ensure ${UPPER_CASE} secret is properly set in GitHub`);
+    throw new Error(
+      `${name} must be provided via context (-c ${camelCase}=example) or ${UPPER_CASE} environment variable`
+    );
+  }
+  return value;
+};
+
+const domainName = getEnvFromGACIC({
+  name: 'domain name',
+  camelCase: 'domainName',
+  UPPER_CASE: 'DOMAIN_NAME',
+});
+const stage = getEnvFromGACIC({ name: 'stage', camelCase: 'stage', UPPER_CASE: 'STAGE' });
 
 new BaseInfraStack(app, 'BaseInfraStack', {
   domainName,
-  apiSubdomain: app.node.tryGetContext('apiSubdomain') || 'api',
-  webSubdomain: app.node.tryGetContext('webSubdomain') || 'app',
+  apiSubdomain: app.node.tryGetContext('apiSubdomain') || (stage !== 'prod' ? stage : '') + 'api',
+  webSubdomain: app.node.tryGetContext('webSubdomain') || (stage !== 'prod' ? stage : '') + 'app',
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT || '676206907471',
     region: process.env.CDK_DEFAULT_REGION || 'us-east-1',
   },
-  description: 'Portfolio Tracker Base Infrastructure - Route53, ACM, API Gateway',
+  stage,
 });

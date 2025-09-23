@@ -13,6 +13,7 @@ export interface WebInfraStackProps extends cdk.StackProps {
   domainName: string;
   webSubdomain?: string;
   apiDomainName: string;
+  stage?: string;
 }
 
 export class WebInfraStack extends cdk.Stack {
@@ -22,7 +23,7 @@ export class WebInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: WebInfraStackProps) {
     super(scope, id, props);
 
-    const { domainName, webSubdomain = 'app', apiDomainName } = props;
+    const { domainName, webSubdomain = 'app', apiDomainName, stage = 'dev' } = props;
 
     // Import resources from base infrastructure
     // Using valueForStringParameter instead of valueFromLookup to avoid synthesis-time lookups
@@ -46,7 +47,7 @@ export class WebInfraStack extends cdk.Stack {
 
     // Create S3 bucket for web hosting
     this.webBucket = new s3.Bucket(this, 'WebBucket', {
-      bucketName: `portfolio-tracker-web-676206907471-${cdk.Aws.REGION}`,
+      bucketName: `portfolio-tracker-web-${stage}-676206907471-${cdk.Aws.REGION}`,
       websiteIndexDocument: 'index.html',
       websiteErrorDocument: 'index.html', // For SPA routing
       publicReadAccess: false,
@@ -155,9 +156,10 @@ export class WebInfraStack extends cdk.Stack {
 </head>
 <body>
   <div class="container">
-    <h1>Portfolio Tracker</h1>
+    <h1>Portfolio Tracker${stage !== 'prod' ? ` (${stage})` : ''}</h1>
     <p>Application will be deployed here</p>
     <p>API: <code>${apiDomainName}</code></p>
+    <p>Environment: <code>${stage}</code></p>
   </div>
 </body>
 </html>

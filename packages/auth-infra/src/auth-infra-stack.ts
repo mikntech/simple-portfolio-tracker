@@ -8,6 +8,7 @@ export interface AuthInfraStackProps extends cdk.StackProps {
   googleClientSecret: string;
   domainPrefix: string;
   webDomain: string;
+  stage: string;
 }
 
 export class AuthInfraStack extends cdk.Stack {
@@ -20,7 +21,7 @@ export class AuthInfraStack extends cdk.Stack {
 
     // Create User Pool
     this.userPool = new cognito.UserPool(this, 'UserPool', {
-      userPoolName: 'portfolio-tracker-users',
+      userPoolName: `portfolio-tracker-users-${props.stage}`,
       selfSignUpEnabled: true,
       signInAliases: {
         email: true,
@@ -91,11 +92,11 @@ export class AuthInfraStack extends cdk.Stack {
           scopes: [cognito.OAuthScope.OPENID, cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE],
           callbackUrls: [
             `https://${props.webDomain}/`,
-            'http://localhost:3001/', // For local development
+            'http://localhost:3000/', // For local development
           ],
           logoutUrls: [
             `https://${props.webDomain}/`,
-            'http://localhost:3001/', // For local development
+            'http://localhost:3000/', // For local development
           ],
         },
       });
@@ -106,7 +107,7 @@ export class AuthInfraStack extends cdk.Stack {
       // Create App Client without Google provider for development
       this.userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClient', {
         userPool: this.userPool,
-        userPoolClientName: 'portfolio-tracker-web',
+        userPoolClientName: `portfolio-tracker-web-${props.stage}`,
         generateSecret: false,
         authFlows: {
           userSrp: true,
@@ -118,8 +119,8 @@ export class AuthInfraStack extends cdk.Stack {
             authorizationCodeGrant: true,
           },
           scopes: [cognito.OAuthScope.OPENID, cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE],
-          callbackUrls: [`https://${props.webDomain}/`, 'http://localhost:3001/'],
-          logoutUrls: [`https://${props.webDomain}/`, 'http://localhost:3001/'],
+          callbackUrls: [`https://${props.webDomain}/`, 'http://localhost:3000/'],
+          logoutUrls: [`https://${props.webDomain}/`, 'http://localhost:3000/'],
         },
       });
     }

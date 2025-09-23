@@ -13,5 +13,4 @@ new PortfolioServiceStack(app, 'PortfolioServiceStack', {
     account: process.env.CDK_DEFAULT_ACCOUNT || '676206907471',
     region: process.env.CDK_DEFAULT_REGION || 'us-east-1',
   },
-  description: `Portfolio Tracker Service - Lambda functions and DynamoDB tables (${stage})`,
 });

@@ -18,8 +18,6 @@ export class PortfolioServiceStack extends cdk.Stack {
 
     const { stage } = props;
 
-    // Import base infrastructure resources
-    // Using valueForStringParameter instead of valueFromLookup to avoid synthesis-time lookups
     const apiGatewayId = ssm.StringParameter.valueForStringParameter(
       this,
       '/portfolio-tracker/base/api-gateway-id'
@@ -29,19 +27,17 @@ export class PortfolioServiceStack extends cdk.Stack {
       '/portfolio-tracker/base/api-gateway-root-resource-id'
     );
 
-    // Import API Gateway
     const api = apigateway.RestApi.fromRestApiAttributes(this, 'ApiGateway', {
       restApiId: apiGatewayId,
       rootResourceId: apiGatewayRootResourceId,
     });
 
-    // Create DynamoDB tables
     const usersTable = new dynamodb.Table(this, 'UsersTable', {
       tableName: `portfolio-tracker-users-${stage}`,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // For development only
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     usersTable.addGlobalSecondaryIndex({
@@ -107,7 +103,6 @@ export class PortfolioServiceStack extends cdk.Stack {
       sortKey: { name: 'assetId', type: dynamodb.AttributeType.STRING },
     });
 
-    // Common Lambda environment variables
     const commonEnv = {
       STAGE: stage,
       USERS_TABLE: usersTable.tableName,
@@ -118,7 +113,6 @@ export class PortfolioServiceStack extends cdk.Stack {
       LOG_LEVEL: 'INFO',
     };
 
-    // Lambda function defaults
     const functionDefaults = {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: 'index.handler',
@@ -133,7 +127,6 @@ export class PortfolioServiceStack extends cdk.Stack {
       },
     };
 
-    // Create OPTIONS handler for CORS
     const optionsHandler = new NodejsFunction(this, 'OptionsHandler', {
       ...functionDefaults,
       entry: path.join(__dirname, '../../src/handlers/options.ts'),
@@ -142,7 +135,6 @@ export class PortfolioServiceStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(10),
     });
 
-    // Create Lambda functions for each endpoint
     const userHandlers = {
       create: new NodejsFunction(this, 'CreateUserFunction', {
         ...functionDefaults,
@@ -287,7 +279,6 @@ export class PortfolioServiceStack extends cdk.Stack {
       }),
     };
 
-    // Grant DynamoDB permissions
     usersTable.grantReadWriteData(userHandlers.create);
     usersTable.grantReadData(userHandlers.get);
     usersTable.grantReadWriteData(userHandlers.update);
@@ -328,10 +319,8 @@ export class PortfolioServiceStack extends cdk.Stack {
     transactionsTable.grantReadData(allocationHandlers.summary);
     assetsTable.grantReadData(allocationHandlers.summary);
 
-    // Create API Gateway resources
     const apiV1 = api.root.addResource('v1');
 
-    // Users endpoints
     const users = apiV1.addResource('users');
     const userById = users.addResource('{id}');
 
@@ -342,7 +331,7 @@ export class PortfolioServiceStack extends cdk.Stack {
     userById.addMethod('PUT', new apigateway.LambdaIntegration(userHandlers.update));
     userById.addMethod('DELETE', new apigateway.LambdaIntegration(userHandlers.delete));
     userById.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
-    // Portfolios endpoints
+
     const portfolios = apiV1.addResource('portfolios');
     const portfolioById = portfolios.addResource('{id}');
     const portfolioSummary = portfolioById.addResource('summary');
@@ -365,7 +354,7 @@ export class PortfolioServiceStack extends cdk.Stack {
 
     holdingByAssetId.addMethod('GET', new apigateway.LambdaIntegration(holdingHandlers.get));
     holdingByAssetId.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
-    // Transactions endpoints
+
     const transactions = apiV1.addResource('transactions');
     const transactionById = transactions.addResource('{id}');
 
@@ -380,7 +369,7 @@ export class PortfolioServiceStack extends cdk.Stack {
       new apigateway.LambdaIntegration(transactionHandlers.delete)
     );
     transactionById.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
-    // Assets endpoints
+
     const assets = apiV1.addResource('assets');
     const assetSearch = assets.addResource('search');
     const assetById = assets.addResource('{id}');
@@ -395,7 +384,7 @@ export class PortfolioServiceStack extends cdk.Stack {
 
     assetBySymbol.addMethod('GET', new apigateway.LambdaIntegration(assetHandlers.getBySymbol));
     assetBySymbol.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
-    // Allocations endpoints
+
     const allocations = apiV1.addResource('allocations');
     const allocationById = allocations.addResource('{id}');
     const portfolioAllocations = portfolioById.addResource('allocations');
@@ -421,7 +410,7 @@ export class PortfolioServiceStack extends cdk.Stack {
       'OPTIONS',
       new apigateway.LambdaIntegration(optionsHandler)
     );
-    // Outputs
+
     new cdk.CfnOutput(this, 'UsersTableName', {
       value: usersTable.tableName,
       description: 'Users DynamoDB table name',
