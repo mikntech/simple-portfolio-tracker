@@ -76,6 +76,9 @@ importers:
       '@trpc/server':
         specifier: ^11.0.0-rc.482
         version: 11.5.1(typescript@5.9.2)
+      tslib:
+        specifier: ^2.6.0
+        version: 2.8.1
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -92,6 +95,9 @@ importers:
       '@portfolio-tracker/shared-types':
         specifier: workspace:*
         version: link:../shared-types
+      tslib:
+        specifier: ^2.6.0
+        version: 2.8.1
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -173,6 +179,9 @@ importers:
       '@portfolio-tracker/shared-types':
         specifier: workspace:*
         version: link:../shared-types
+      tslib:
+        specifier: ^2.6.0
+        version: 2.8.1
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -220,6 +229,9 @@ importers:
 
   packages/shared-types:
     dependencies:
+      tslib:
+        specifier: ^2.6.0
+        version: 2.8.1
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -263,6 +275,9 @@ importers:
       react-router-dom:
         specifier: ^6.30.1
         version: 6.30.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      tslib:
+        specifier: ^2.6.0
+        version: 2.8.1
       zod:
         specifier: ^3.22.0
         version: 3.25.76

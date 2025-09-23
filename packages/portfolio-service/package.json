@@ -13,6 +13,7 @@
     "@portfolio-tracker/api-contracts": "workspace:*",
     "@aws-sdk/client-dynamodb": "^3.0.0",
     "@aws-sdk/lib-dynamodb": "^3.0.0",
+    "tslib": "^2.6.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
