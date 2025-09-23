@@ -325,12 +325,80 @@ export class PortfolioServiceStack extends cdk.Stack {
     const userById = users.addResource('{id}');
 
     users.addMethod('POST', new apigateway.LambdaIntegration(userHandlers.create));
-    users.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    users.addMethod(
+      'OPTIONS',
+      new apigateway.MockIntegration({
+        integrationResponses: [
+          {
+            statusCode: '200',
+            responseParameters: {
+              'method.response.header.Access-Control-Allow-Headers':
+                "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+              'method.response.header.Access-Control-Allow-Methods':
+                "'GET,POST,PUT,DELETE,OPTIONS'",
+              'method.response.header.Access-Control-Allow-Origin': "'*'",
+              'method.response.header.Access-Control-Allow-Credentials': "'true'",
+            },
+          },
+        ],
+        passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
+        requestTemplates: {
+          'application/json': '{"statusCode": 200}',
+        },
+      }),
+      {
+        methodResponses: [
+          {
+            statusCode: '200',
+            responseParameters: {
+              'method.response.header.Access-Control-Allow-Headers': true,
+              'method.response.header.Access-Control-Allow-Methods': true,
+              'method.response.header.Access-Control-Allow-Origin': true,
+              'method.response.header.Access-Control-Allow-Credentials': true,
+            },
+          },
+        ],
+      }
+    );
 
     userById.addMethod('GET', new apigateway.LambdaIntegration(userHandlers.get));
     userById.addMethod('PUT', new apigateway.LambdaIntegration(userHandlers.update));
     userById.addMethod('DELETE', new apigateway.LambdaIntegration(userHandlers.delete));
-    userById.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    userById.addMethod(
+      'OPTIONS',
+      new apigateway.MockIntegration({
+        integrationResponses: [
+          {
+            statusCode: '200',
+            responseParameters: {
+              'method.response.header.Access-Control-Allow-Headers':
+                "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+              'method.response.header.Access-Control-Allow-Methods':
+                "'GET,POST,PUT,DELETE,OPTIONS'",
+              'method.response.header.Access-Control-Allow-Origin': "'*'",
+              'method.response.header.Access-Control-Allow-Credentials': "'true'",
+            },
+          },
+        ],
+        passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
+        requestTemplates: {
+          'application/json': '{"statusCode": 200}',
+        },
+      }),
+      {
+        methodResponses: [
+          {
+            statusCode: '200',
+            responseParameters: {
+              'method.response.header.Access-Control-Allow-Headers': true,
+              'method.response.header.Access-Control-Allow-Methods': true,
+              'method.response.header.Access-Control-Allow-Origin': true,
+              'method.response.header.Access-Control-Allow-Credentials': true,
+            },
+          },
+        ],
+      }
+    );
 
     const portfolios = apiV1.addResource('portfolios');
     const portfolioById = portfolios.addResource('{id}');
