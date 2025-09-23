@@ -6,8 +6,10 @@
     "build": "tsc",
     "watch": "tsc -w",
     "cdk": "cdk",
-    "deploy": "cdk deploy",
-    "deploy:script": "./deploy.sh",
+    "bootstrap": "cdk bootstrap",
+    "deploy": "cdk deploy --all --require-approval never",
+    "deploy:dev": "cdk deploy --all --require-approval never -c stage=dev",
+    "deploy:prod": "cdk deploy --all --require-approval never -c stage=prod",
     "diff": "cdk diff",
     "synth": "cdk synth",
     "test": "jest"

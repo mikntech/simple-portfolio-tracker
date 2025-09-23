@@ -5,8 +5,8 @@
   "scripts": {
     "build": "tsc",
     "cdk": "cdk",
-    "deploy": "cdk deploy --all --require-approval never",
-    "deploy:script": "./deploy.sh",
+    "bootstrap": "cdk bootstrap",
+    "deploy": "cdk deploy --all --require-approval never --outputs-file outputs.json",
     "diff": "cdk diff",
     "synth": "cdk synth"
   },

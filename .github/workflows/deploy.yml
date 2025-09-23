@@ -68,18 +68,17 @@ jobs:
           GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
           WEB_DOMAIN=app.${{ secrets.DOMAIN_NAME }} \
           COGNITO_DOMAIN_PREFIX=${{ secrets.COGNITO_DOMAIN_PREFIX || 'portfolio-tracker-dev' }} \
-          pnpm run cdk deploy -- --require-approval never --outputs-file outputs.json
+          pnpm run deploy
           cd ../..
 
           # Deploy portfolio service
           cd packages/portfolio-service/cdk
-          chmod +x deploy.sh
-          STAGE=dev ./deploy.sh
+          STAGE=dev pnpm run deploy:dev
           cd ../../..
 
           # Deploy web infrastructure
           cd packages/web-infra
-          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} pnpm run cdk deploy -- --require-approval never --outputs-file outputs.json
+          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} pnpm run deploy
           cd ../..
 
       - name: Extract CDK outputs
@@ -197,18 +196,17 @@ jobs:
           GOOGLE_CLIENT_SECRET=${{ secrets.PROD_GOOGLE_CLIENT_SECRET }} \
           WEB_DOMAIN=app.${{ secrets.PROD_DOMAIN_NAME }} \
           COGNITO_DOMAIN_PREFIX=${{ secrets.PROD_COGNITO_DOMAIN_PREFIX || 'portfolio-tracker-prod' }} \
-          pnpm run cdk deploy -- --require-approval never --outputs-file outputs.json
+          pnpm run deploy
           cd ../..
 
           # Deploy portfolio service
           cd packages/portfolio-service/cdk
-          chmod +x deploy.sh
-          STAGE=prod ./deploy.sh
+          STAGE=prod pnpm run deploy:prod
           cd ../../..
 
           # Deploy web infrastructure
           cd packages/web-infra
-          STAGE=prod DOMAIN_NAME=${{ secrets.PROD_DOMAIN_NAME }} pnpm run cdk deploy -- --require-approval never --outputs-file outputs.json
+          STAGE=prod DOMAIN_NAME=${{ secrets.PROD_DOMAIN_NAME }} pnpm run deploy
           cd ../..
 
       - name: Extract CDK outputs
