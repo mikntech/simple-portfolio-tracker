@@ -1,18 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../utils/api-client';
 
-export function useHoldings(portfolioId: string) {
+export function useHoldings(userId: string) {
   return useQuery({
-    queryKey: ['holdings', portfolioId],
-    queryFn: () => apiClient.holdings.list(portfolioId),
-    enabled: !!portfolioId,
+    queryKey: ['holdings', userId],
+    queryFn: () => apiClient.holdings.list(userId),
+    enabled: !!userId,
   });
 }
 
-export function useHolding(portfolioId: string, assetId: string) {
+export function useHolding(userId: string, assetId: string) {
   return useQuery({
-    queryKey: ['holding', portfolioId, assetId],
-    queryFn: () => apiClient.holdings.get(portfolioId, assetId),
-    enabled: !!portfolioId && !!assetId,
+    queryKey: ['holding', userId, assetId],
+    queryFn: () => apiClient.holdings.get(userId, assetId),
+    enabled: !!userId && !!assetId,
   });
 }

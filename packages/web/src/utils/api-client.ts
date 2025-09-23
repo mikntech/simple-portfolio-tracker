@@ -99,33 +99,12 @@ class ApiClient {
     },
   };
 
-  // Portfolio endpoints (simplified - most CRUD operations removed)
-  portfolios = {
-    // Note: In the simplified backend, portfolios are automatically created with users
-    // These methods are kept for backwards compatibility but some will need to be handled differently
-
-    list: async (params?: { userId?: string }): Promise<any[]> => {
-      // This endpoint exists in the backend but not in API contracts
-      const response = await this.request<any[]>('GET', '/portfolios', {
-        query: params,
-      });
-      return response.data!;
-    },
-
-    delete: async (id: string): Promise<void> => {
-      await this.request('DELETE', `/portfolios/${id}`);
-    },
-
-    getSummary: async (id: string): Promise<PortfolioSummary> => {
-      const response = await this.request<PortfolioSummary>('GET', `/portfolios/${id}/summary`);
-      return response.data!;
-    },
-  };
+  // Portfolio endpoints removed - portfolios are now implicit per user
 
   // Transaction endpoints
   transactions = {
     create: async (data: {
-      portfolioId: string;
+      userId: string;
       assetId: string;
       type: 'buy' | 'sell';
       quantity: number;
@@ -147,7 +126,7 @@ class ApiClient {
     },
 
     list: async (params: {
-      portfolioId: string;
+      userId: string;
       assetId?: string;
       type?: string;
       startDate?: string;
@@ -212,16 +191,13 @@ class ApiClient {
 
   // Holdings endpoints
   holdings = {
-    list: async (portfolioId: string): Promise<Holding[]> => {
-      const response = await this.request<Holding[]>('GET', `/portfolios/${portfolioId}/holdings`);
+    list: async (userId: string): Promise<Holding[]> => {
+      const response = await this.request<Holding[]>('GET', `/users/${userId}/holdings`);
       return response.data!;
     },
 
-    get: async (portfolioId: string, assetId: string): Promise<Holding> => {
-      const response = await this.request<Holding>(
-        'GET',
-        `/portfolios/${portfolioId}/holdings/${assetId}`
-      );
+    get: async (userId: string, assetId: string): Promise<Holding> => {
+      const response = await this.request<Holding>('GET', `/users/${userId}/holdings/${assetId}`);
       return response.data!;
     },
   };
@@ -233,11 +209,8 @@ class ApiClient {
       return response.data!;
     },
 
-    list: async (portfolioId: string): Promise<Allocation[]> => {
-      const response = await this.request<Allocation[]>(
-        'GET',
-        `/portfolios/${portfolioId}/allocations`
-      );
+    list: async (userId: string): Promise<Allocation[]> => {
+      const response = await this.request<Allocation[]>('GET', `/users/${userId}/allocations`);
       return response.data!;
     },
 
@@ -250,10 +223,10 @@ class ApiClient {
       await this.request('DELETE', `/allocations/${id}`);
     },
 
-    getSummary: async (portfolioId: string): Promise<PortfolioAllocationSummary> => {
+    getSummary: async (userId: string): Promise<PortfolioAllocationSummary> => {
       const response = await this.request<PortfolioAllocationSummary>(
         'GET',
-        `/portfolios/${portfolioId}/allocation-summary`
+        `/users/${userId}/allocation-summary`
       );
       return response.data!;
     },
