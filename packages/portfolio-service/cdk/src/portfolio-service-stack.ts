@@ -36,7 +36,9 @@ export class PortfolioServiceStack extends cdk.Stack {
       tableName: `pt2-users-${stage}`,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+      },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
@@ -49,7 +51,9 @@ export class PortfolioServiceStack extends cdk.Stack {
       tableName: `pt2-portfolios-${stage}`,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+      },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
@@ -87,7 +91,9 @@ export class PortfolioServiceStack extends cdk.Stack {
       tableName: `pt2-transactions-${stage}`,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+      },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
@@ -119,12 +125,28 @@ export class PortfolioServiceStack extends cdk.Stack {
       environment: commonEnv,
       memorySize: 512,
       timeout: cdk.Duration.seconds(30),
-      logRetention: logs.RetentionDays.ONE_WEEK,
       bundling: {
         externalModules: ['aws-sdk'],
         minify: true,
         sourceMap: true,
       },
+    };
+
+    // Helper function to create Lambda with log group
+    const createLambdaFunction = (id: string, props: any): NodejsFunction => {
+      const func = new NodejsFunction(this, id, {
+        ...functionDefaults,
+        ...props,
+      });
+
+      // Create log group with retention
+      new logs.LogGroup(this, `${id}LogGroup`, {
+        logGroupName: `/aws/lambda/${props.functionName}`,
+        retention: logs.RetentionDays.ONE_WEEK,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      });
+
+      return func;
     };
 
     // Create a reusable OPTIONS method configuration for CORS
@@ -162,56 +184,46 @@ export class PortfolioServiceStack extends cdk.Stack {
     };
 
     const userHandlers = {
-      create: new NodejsFunction(this, 'CreateUserFunction', {
-        ...functionDefaults,
+      create: createLambdaFunction('CreateUserFunction', {
         entry: path.join(__dirname, '../../src/handlers/users/create.ts'),
         functionName: `pt2-create-user-${stage}`,
       }),
-      get: new NodejsFunction(this, 'GetUserFunction', {
-        ...functionDefaults,
+      get: createLambdaFunction('GetUserFunction', {
         entry: path.join(__dirname, '../../src/handlers/users/get.ts'),
         functionName: `pt2-get-user-${stage}`,
       }),
-      update: new NodejsFunction(this, 'UpdateUserFunction', {
-        ...functionDefaults,
+      update: createLambdaFunction('UpdateUserFunction', {
         entry: path.join(__dirname, '../../src/handlers/users/update.ts'),
         functionName: `pt2-update-user-${stage}`,
       }),
-      delete: new NodejsFunction(this, 'DeleteUserFunction', {
-        ...functionDefaults,
+      delete: createLambdaFunction('DeleteUserFunction', {
         entry: path.join(__dirname, '../../src/handlers/users/delete.ts'),
         functionName: `pt2-delete-user-${stage}`,
       }),
     };
 
     const portfolioHandlers = {
-      create: new NodejsFunction(this, 'CreatePortfolioFunction', {
-        ...functionDefaults,
+      create: createLambdaFunction('CreatePortfolioFunction', {
         entry: path.join(__dirname, '../../src/handlers/portfolios/create.ts'),
         functionName: `pt2-create-portfolio-${stage}`,
       }),
-      get: new NodejsFunction(this, 'GetPortfolioFunction', {
-        ...functionDefaults,
+      get: createLambdaFunction('GetPortfolioFunction', {
         entry: path.join(__dirname, '../../src/handlers/portfolios/get.ts'),
         functionName: `pt2-get-portfolio-${stage}`,
       }),
-      list: new NodejsFunction(this, 'ListPortfoliosFunction', {
-        ...functionDefaults,
+      list: createLambdaFunction('ListPortfoliosFunction', {
         entry: path.join(__dirname, '../../src/handlers/portfolios/list.ts'),
         functionName: `pt2-list-portfolios-${stage}`,
       }),
-      update: new NodejsFunction(this, 'UpdatePortfolioFunction', {
-        ...functionDefaults,
+      update: createLambdaFunction('UpdatePortfolioFunction', {
         entry: path.join(__dirname, '../../src/handlers/portfolios/update.ts'),
         functionName: `pt2-update-portfolio-${stage}`,
       }),
-      delete: new NodejsFunction(this, 'DeletePortfolioFunction', {
-        ...functionDefaults,
+      delete: createLambdaFunction('DeletePortfolioFunction', {
         entry: path.join(__dirname, '../../src/handlers/portfolios/delete.ts'),
         functionName: `pt2-delete-portfolio-${stage}`,
       }),
-      summary: new NodejsFunction(this, 'PortfolioSummaryFunction', {
-        ...functionDefaults,
+      summary: createLambdaFunction('PortfolioSummaryFunction', {
         entry: path.join(__dirname, '../../src/handlers/portfolios/summary.ts'),
         functionName: `pt2-portfolio-summary-${stage}`,
         timeout: cdk.Duration.minutes(1),
@@ -219,87 +231,72 @@ export class PortfolioServiceStack extends cdk.Stack {
     };
 
     const transactionHandlers = {
-      create: new NodejsFunction(this, 'CreateTransactionFunction', {
-        ...functionDefaults,
+      create: createLambdaFunction('CreateTransactionFunction', {
         entry: path.join(__dirname, '../../src/handlers/transactions/create.ts'),
         functionName: `pt2-create-transaction-${stage}`,
       }),
-      get: new NodejsFunction(this, 'GetTransactionFunction', {
-        ...functionDefaults,
+      get: createLambdaFunction('GetTransactionFunction', {
         entry: path.join(__dirname, '../../src/handlers/transactions/get.ts'),
         functionName: `pt2-get-transaction-${stage}`,
       }),
-      list: new NodejsFunction(this, 'ListTransactionsFunction', {
-        ...functionDefaults,
+      list: createLambdaFunction('ListTransactionsFunction', {
         entry: path.join(__dirname, '../../src/handlers/transactions/list.ts'),
         functionName: `pt2-list-transactions-${stage}`,
       }),
-      update: new NodejsFunction(this, 'UpdateTransactionFunction', {
-        ...functionDefaults,
+      update: createLambdaFunction('UpdateTransactionFunction', {
         entry: path.join(__dirname, '../../src/handlers/transactions/update.ts'),
         functionName: `pt2-update-transaction-${stage}`,
       }),
-      delete: new NodejsFunction(this, 'DeleteTransactionFunction', {
-        ...functionDefaults,
+      delete: createLambdaFunction('DeleteTransactionFunction', {
         entry: path.join(__dirname, '../../src/handlers/transactions/delete.ts'),
         functionName: `pt2-delete-transaction-${stage}`,
       }),
     };
 
     const assetHandlers = {
-      search: new NodejsFunction(this, 'SearchAssetsFunction', {
-        ...functionDefaults,
+      search: createLambdaFunction('SearchAssetsFunction', {
         entry: path.join(__dirname, '../../src/handlers/assets/search.ts'),
         functionName: `pt2-search-assets-${stage}`,
       }),
-      get: new NodejsFunction(this, 'GetAssetFunction', {
-        ...functionDefaults,
+      get: createLambdaFunction('GetAssetFunction', {
         entry: path.join(__dirname, '../../src/handlers/assets/get.ts'),
         functionName: `pt2-get-asset-${stage}`,
       }),
-      getBySymbol: new NodejsFunction(this, 'GetAssetBySymbolFunction', {
-        ...functionDefaults,
+      getBySymbol: createLambdaFunction('GetAssetBySymbolFunction', {
         entry: path.join(__dirname, '../../src/handlers/assets/get-by-symbol.ts'),
         functionName: `pt2-get-asset-by-symbol-${stage}`,
       }),
     };
 
     const holdingHandlers = {
-      list: new NodejsFunction(this, 'ListHoldingsFunction', {
-        ...functionDefaults,
+      list: createLambdaFunction('ListHoldingsFunction', {
         entry: path.join(__dirname, '../../src/handlers/holdings/list.ts'),
         functionName: `pt2-list-holdings-${stage}`,
       }),
-      get: new NodejsFunction(this, 'GetHoldingFunction', {
-        ...functionDefaults,
+      get: createLambdaFunction('GetHoldingFunction', {
         entry: path.join(__dirname, '../../src/handlers/holdings/get.ts'),
         functionName: `pt2-get-holding-${stage}`,
       }),
     };
 
     const allocationHandlers = {
-      create: new NodejsFunction(this, 'CreateAllocationFunction', {
-        ...functionDefaults,
+      create: createLambdaFunction('CreateAllocationFunction', {
         entry: path.join(__dirname, '../../src/handlers/allocations/create.ts'),
         functionName: `pt2-create-allocation-${stage}`,
       }),
-      list: new NodejsFunction(this, 'ListAllocationsFunction', {
-        ...functionDefaults,
+      list: createLambdaFunction('ListAllocationsFunction', {
         entry: path.join(__dirname, '../../src/handlers/allocations/list.ts'),
         functionName: `pt2-list-allocations-${stage}`,
       }),
-      update: new NodejsFunction(this, 'UpdateAllocationFunction', {
-        ...functionDefaults,
+      update: createLambdaFunction('UpdateAllocationFunction', {
         entry: path.join(__dirname, '../../src/handlers/allocations/update.ts'),
         functionName: `pt2-update-allocation-${stage}`,
       }),
-      delete: new NodejsFunction(this, 'DeleteAllocationFunction', {
-        ...functionDefaults,
+      delete: createLambdaFunction('DeleteAllocationFunction', {
         entry: path.join(__dirname, '../../src/handlers/allocations/delete.ts'),
         functionName: `pt2-delete-allocation-${stage}`,
       }),
-      summary: new NodejsFunction(this, 'GetAllocationSummaryFunction', {
-        ...functionDefaults,
+      summary: createLambdaFunction('GetAllocationSummaryFunction', {
         entry: path.join(__dirname, '../../src/handlers/allocations/summary.ts'),
         functionName: `pt2-allocation-summary-${stage}`,
       }),
