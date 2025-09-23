@@ -199,7 +199,7 @@ jobs:
           GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
           GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
           WEB_DOMAIN=app.${{ secrets.DOMAIN_NAME }} \
-          COGNITO_DOMAIN_PREFIX=${{ secrets.COGNITO_DOMAIN_PREFIX || 'portfolio-tracker-prod' }} \
+          COGNITO_DOMAIN_PREFIX=${{ secrets.COGNITO_DOMAIN_PREFIX_PROD || 'portfolio-tracker-prod' }} \
           pnpm run deploy
           cd ../..
 
