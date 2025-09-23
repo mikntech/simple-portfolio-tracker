@@ -12,7 +12,7 @@ export function TransactionList({ portfolioId }: TransactionListProps) {
   const [filterType, setFilterType] = useState<string>('');
 
   const { data, isLoading, error } = useTransactions({
-    portfolioId,
+    userId: portfolioId,
     type: filterType || undefined,
     page,
     limit: 20,
