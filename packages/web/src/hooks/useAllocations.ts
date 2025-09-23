@@ -24,8 +24,8 @@ export function useCreateAllocation() {
   return useMutation({
     mutationFn: (data: CreateAllocation) => apiClient.allocations.create(data),
     onSuccess: (result, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['allocations', variables.userId] });
-      queryClient.invalidateQueries({ queryKey: ['allocation-summary', variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ['allocations'] });
+      queryClient.invalidateQueries({ queryKey: ['allocation-summary'] });
     },
   });
 }
@@ -37,8 +37,8 @@ export function useUpdateAllocation() {
     mutationFn: ({ id, data }: { id: string; data: UpdateAllocation }) =>
       apiClient.allocations.update(id, data),
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['allocations', result.userId] });
-      queryClient.invalidateQueries({ queryKey: ['allocation-summary', result.userId] });
+      queryClient.invalidateQueries({ queryKey: ['allocations'] });
+      queryClient.invalidateQueries({ queryKey: ['allocation-summary'] });
     },
   });
 }
@@ -47,11 +47,10 @@ export function useDeleteAllocation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, userId }: { id: string; userId: string }) =>
-      apiClient.allocations.delete(id).then(() => ({ id, userId })),
-    onSuccess: (_, { userId }) => {
-      queryClient.invalidateQueries({ queryKey: ['allocations', userId] });
-      queryClient.invalidateQueries({ queryKey: ['allocation-summary', userId] });
+    mutationFn: ({ id }: { id: string }) => apiClient.allocations.delete(id).then(() => ({ id })),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['allocations', id] });
+      queryClient.invalidateQueries({ queryKey: ['allocation-summary', id] });
     },
   });
 }
