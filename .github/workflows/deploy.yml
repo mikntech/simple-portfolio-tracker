@@ -57,8 +57,8 @@ jobs:
         run: |
           # Deploy base infrastructure
           cd packages/base-infra
-          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} npm run cdk bootstrap || true
-          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} npm run cdk -- deploy --require-approval never --outputs-file outputs.json
+          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} pnpm dlx cdk bootstrap || true
+          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} pnpm dlx cdk -- deploy --require-approval never --outputs-file outputs.json
           cd ../..
 
           # Deploy auth infrastructure
@@ -68,17 +68,17 @@ jobs:
           GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
           WEB_DOMAIN=app.${{ secrets.DOMAIN_NAME }} \
           COGNITO_DOMAIN_PREFIX=${{ secrets.COGNITO_DOMAIN_PREFIX || 'portfolio-tracker-dev' }} \
-          npm run cdk -- deploy --require-approval never --outputs-file outputs.json
+          pnpm dlx cdk -- deploy --require-approval never --outputs-file outputs.json
           cd ../..
 
           # Deploy portfolio service
           cd packages/portfolio-service/cdk
-          STAGE=dev npm run cdk -- deploy --require-approval never
+          STAGE=dev pnpm dlx cdk -- deploy --require-approval never
           cd ../../..
 
           # Deploy web infrastructure
           cd packages/web-infra
-          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} npm run cdk -- deploy --require-approval never --outputs-file outputs.json
+          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} pnpm dlx cdk -- deploy --require-approval never --outputs-file outputs.json
           cd ../..
 
       - name: Extract CDK outputs
@@ -185,8 +185,8 @@ jobs:
         run: |
           # Deploy base infrastructure
           cd packages/base-infra
-          STAGE=prod DOMAIN_NAME=${{ secrets.PROD_DOMAIN_NAME }} npm run cdk bootstrap || true
-          STAGE=prod DOMAIN_NAME=${{ secrets.PROD_DOMAIN_NAME }} npm run cdk -- deploy --require-approval never --outputs-file outputs.json
+          STAGE=prod DOMAIN_NAME=${{ secrets.PROD_DOMAIN_NAME }} pnpm dlx cdk bootstrap || true
+          STAGE=prod DOMAIN_NAME=${{ secrets.PROD_DOMAIN_NAME }} pnpm dlx cdk -- deploy --require-approval never --outputs-file outputs.json
           cd ../..
 
           # Deploy auth infrastructure
@@ -196,17 +196,17 @@ jobs:
           GOOGLE_CLIENT_SECRET=${{ secrets.PROD_GOOGLE_CLIENT_SECRET }} \
           WEB_DOMAIN=app.${{ secrets.PROD_DOMAIN_NAME }} \
           COGNITO_DOMAIN_PREFIX=${{ secrets.PROD_COGNITO_DOMAIN_PREFIX || 'portfolio-tracker-prod' }} \
-          npm run cdk -- deploy --require-approval never --outputs-file outputs.json
+          pnpm dlx cdk -- deploy --require-approval never --outputs-file outputs.json
           cd ../..
 
           # Deploy portfolio service
           cd packages/portfolio-service/cdk
-          STAGE=prod npm run cdk -- deploy --require-approval never
+          STAGE=prod pnpm dlx cdk -- deploy --require-approval never
           cd ../../..
 
           # Deploy web infrastructure
           cd packages/web-infra
-          STAGE=prod DOMAIN_NAME=${{ secrets.PROD_DOMAIN_NAME }} npm run cdk -- deploy --require-approval never --outputs-file outputs.json
+          STAGE=prod DOMAIN_NAME=${{ secrets.PROD_DOMAIN_NAME }} pnpm dlx cdk -- deploy --require-approval never --outputs-file outputs.json
           cd ../..
 
       - name: Extract CDK outputs
