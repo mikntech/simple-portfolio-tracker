@@ -16,7 +16,8 @@
     "noEmit": false,
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["node"]
+    "types": ["node"],
+    "importHelpers": true
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "cdk.out", "dist"]
