@@ -20,11 +20,11 @@ export class PortfolioServiceStack extends cdk.Stack {
 
     const apiGatewayId = ssm.StringParameter.valueForStringParameter(
       this,
-      '/portfolio-tracker/base/api-gateway-id'
+      '/portfolio-tracker/base/api-gateway-id' + stage
     );
     const apiGatewayRootResourceId = ssm.StringParameter.valueForStringParameter(
       this,
-      '/portfolio-tracker/base/api-gateway-root-resource-id'
+      '/portfolio-tracker/base/api-gateway-root-resource-id' + stage
     );
 
     const api = apigateway.RestApi.fromRestApiAttributes(this, 'ApiGateway', {

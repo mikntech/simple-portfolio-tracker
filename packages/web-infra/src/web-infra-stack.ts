@@ -29,11 +29,11 @@ export class WebInfraStack extends cdk.Stack {
     // Using valueForStringParameter instead of valueFromLookup to avoid synthesis-time lookups
     const hostedZoneId = ssm.StringParameter.valueForStringParameter(
       this,
-      '/portfolio-tracker/base/hosted-zone-id'
+      '/portfolio-tracker/base/hosted-zone-id' + stage
     );
     const certificateArn = ssm.StringParameter.valueForStringParameter(
       this,
-      '/portfolio-tracker/base/certificate-arn'
+      '/portfolio-tracker/base/certificate-arn' + stage
     );
 
     // Look up hosted zone
