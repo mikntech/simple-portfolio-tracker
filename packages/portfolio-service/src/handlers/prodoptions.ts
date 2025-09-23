@@ -1,7 +1,7 @@
 import { createHandler } from '../utils/lambda-handler';
 
 // Generic OPTIONS handler for all endpoints
-export const handler = createHandler({}, async (context) => {
+export const handler = createHandler('prod', {}, async (context) => {
   console.log('[OPTIONS Lambda] Handler function body executed', {
     path: context.event.path,
     origin: context.event.headers.origin || context.event.headers.Origin,

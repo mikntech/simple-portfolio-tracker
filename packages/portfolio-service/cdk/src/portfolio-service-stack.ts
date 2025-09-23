@@ -129,7 +129,7 @@ export class PortfolioServiceStack extends cdk.Stack {
 
     const optionsHandler = new NodejsFunction(this, 'OptionsHandler', {
       ...functionDefaults,
-      entry: path.join(__dirname, '../../src/handlers/options.ts'),
+      entry: path.join(__dirname, `../../src/handlers/${stage}options.ts`),
       functionName: `pt2-options-${stage}`,
       memorySize: 128,
       timeout: cdk.Duration.seconds(10),

@@ -18,23 +18,13 @@ export interface HandlerContext<TBody = any, TParams = any, TQuery = any> {
 }
 
 export function createHandler<TBody = any, TParams = any, TQuery = any>(
+  stage: string,
   options: HandlerOptions<TBody, TParams, TQuery>,
   handler: (context: HandlerContext<TBody, TParams, TQuery>) => Promise<ApiResponse<any>>
 ): LambdaHandler {
   return async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    // Log function invocation
-    console.log('[Lambda Handler] Function invoked:', {
-      functionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
-      httpMethod: event.httpMethod,
-      path: event.path,
-      timestamp: new Date().toISOString(),
-    });
-
-    // Get the origin from the request
-    const origin = event.headers.origin || event.headers.Origin || 'https://app.keeride.com';
-
-    // List of allowed origins
-    const allowedOrigins = ['http://localhost:3000'];
+    const allowedOrigins =
+      stage === 'dev' ? ['http://localhost:3000'] : ['https://app.keeride.com'];
     const corsOrigin = allowedOrigins[0];
 
     const headers = {
