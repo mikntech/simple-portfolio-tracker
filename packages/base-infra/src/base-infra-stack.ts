@@ -38,7 +38,7 @@ export class BaseInfraStack extends cdk.Stack {
     });
 
     this.apiGateway = new apigateway.RestApi(this, 'ApiGateway', {
-      restApiName: 'portfolio-tracker-api',
+      restApiName: 'portfolio-tracker-api-' + stage,
       description: 'Portfolio Tracker API Gateway',
       deployOptions: {
         stageName: stage,
