@@ -47,13 +47,17 @@ export function createHandler<TBody = any, TParams = any, TQuery = any>(
       'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
     };
 
-    // Handle OPTIONS requests for CORS preflight
+    // Note: OPTIONS requests are now handled by API Gateway Mock integrations
+    // This code should not be reached, but keeping as a fallback
     if (event.httpMethod === 'OPTIONS') {
-      console.log('[OPTIONS Handler] Handling preflight request', {
-        origin,
-        corsOrigin,
-        path: event.path,
-      });
+      console.log(
+        '[WARNING] OPTIONS request reached Lambda handler - should be handled by API Gateway',
+        {
+          origin,
+          corsOrigin,
+          path: event.path,
+        }
+      );
       return {
         statusCode: 200,
         headers,

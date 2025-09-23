@@ -289,29 +289,29 @@ export class PortfolioBackendStack extends cdk.Stack {
     const userById = users.addResource('{id}');
 
     users.addMethod('POST', new apigateway.LambdaIntegration(userHandlers.create));
-    // OPTIONS handled by API Gateway CORS configuration
+    users.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     userById.addMethod('GET', new apigateway.LambdaIntegration(userHandlers.get));
     userById.addMethod('PUT', new apigateway.LambdaIntegration(userHandlers.update));
     userById.addMethod('DELETE', new apigateway.LambdaIntegration(userHandlers.delete));
-    // OPTIONS handled by API Gateway CORS configuration
+    userById.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     // Holdings will be accessed via users/{userId}/holdings
     const userHoldings = userById.addResource('holdings');
     const userHoldingByAssetId = userHoldings.addResource('{assetId}');
 
     userHoldings.addMethod('GET', new apigateway.LambdaIntegration(holdingHandlers.list));
-    // OPTIONS handled by API Gateway CORS configuration
+    userHoldings.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     userHoldingByAssetId.addMethod('GET', new apigateway.LambdaIntegration(holdingHandlers.get));
-    // OPTIONS handled by API Gateway CORS configuration
+    userHoldingByAssetId.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     const transactions = apiV1.addResource('transactions');
     const transactionById = transactions.addResource('{id}');
 
     transactions.addMethod('POST', new apigateway.LambdaIntegration(transactionHandlers.create));
     transactions.addMethod('GET', new apigateway.LambdaIntegration(transactionHandlers.list));
-    // OPTIONS handled by API Gateway CORS configuration
+    transactions.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     transactionById.addMethod('GET', new apigateway.LambdaIntegration(transactionHandlers.get));
     transactionById.addMethod('PUT', new apigateway.LambdaIntegration(transactionHandlers.update));
@@ -319,7 +319,7 @@ export class PortfolioBackendStack extends cdk.Stack {
       'DELETE',
       new apigateway.LambdaIntegration(transactionHandlers.delete)
     );
-    // OPTIONS handled by API Gateway CORS configuration
+    transactionById.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     const assets = apiV1.addResource('assets');
     const assetSearch = assets.addResource('search');
@@ -328,13 +328,13 @@ export class PortfolioBackendStack extends cdk.Stack {
     const assetBySymbol = assetSymbol.addResource('{symbol}');
 
     assetSearch.addMethod('GET', new apigateway.LambdaIntegration(assetHandlers.search));
-    // OPTIONS handled by API Gateway CORS configuration
+    assetSearch.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     assetById.addMethod('GET', new apigateway.LambdaIntegration(assetHandlers.get));
-    // OPTIONS handled by API Gateway CORS configuration
+    assetById.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     assetBySymbol.addMethod('GET', new apigateway.LambdaIntegration(assetHandlers.getBySymbol));
-    // OPTIONS handled by API Gateway CORS configuration
+    assetBySymbol.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     const allocations = apiV1.addResource('allocations');
     const allocationById = allocations.addResource('{id}');
@@ -343,19 +343,19 @@ export class PortfolioBackendStack extends cdk.Stack {
     const userAllocationSummary = userById.addResource('allocation-summary');
 
     allocations.addMethod('POST', new apigateway.LambdaIntegration(allocationHandlers.create));
-    // OPTIONS handled by API Gateway CORS configuration
+    allocations.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
     allocationById.addMethod('PUT', new apigateway.LambdaIntegration(allocationHandlers.update));
     allocationById.addMethod('DELETE', new apigateway.LambdaIntegration(allocationHandlers.delete));
-    // OPTIONS handled by API Gateway CORS configuration
+    allocationById.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     userAllocations.addMethod('GET', new apigateway.LambdaIntegration(allocationHandlers.list));
-    // OPTIONS handled by API Gateway CORS configuration
+    userAllocations.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     userAllocationSummary.addMethod(
       'GET',
       new apigateway.LambdaIntegration(allocationHandlers.summary)
     );
-    // OPTIONS handled by API Gateway CORS configuration
+    userAllocationSummary.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     new cdk.CfnOutput(this, 'UsersTableName', {
       value: usersTable.tableName,
