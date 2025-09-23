@@ -33,7 +33,7 @@ export class PortfolioServiceStack extends cdk.Stack {
     });
 
     const usersTable = new dynamodb.Table(this, 'UsersTable', {
-      tableName: `portfolio-tracker-users-${stage}`,
+      tableName: `pt2-users-${stage}`,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       pointInTimeRecovery: true,
@@ -46,7 +46,7 @@ export class PortfolioServiceStack extends cdk.Stack {
     });
 
     const portfoliosTable = new dynamodb.Table(this, 'PortfoliosTable', {
-      tableName: `portfolio-tracker-portfolios-${stage}`,
+      tableName: `pt2-portfolios-${stage}`,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       pointInTimeRecovery: true,
@@ -59,7 +59,7 @@ export class PortfolioServiceStack extends cdk.Stack {
     });
 
     const allocationsTable = new dynamodb.Table(this, 'AllocationsTable', {
-      tableName: `portfolio-tracker-allocations-${stage}`,
+      tableName: `pt2-allocations-${stage}`,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -72,7 +72,7 @@ export class PortfolioServiceStack extends cdk.Stack {
     });
 
     const assetsTable = new dynamodb.Table(this, 'AssetsTable', {
-      tableName: `portfolio-tracker-assets-${stage}`,
+      tableName: `pt2-assets-${stage}`,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -84,7 +84,7 @@ export class PortfolioServiceStack extends cdk.Stack {
     });
 
     const transactionsTable = new dynamodb.Table(this, 'TransactionsTable', {
-      tableName: `portfolio-tracker-transactions-${stage}`,
+      tableName: `pt2-transactions-${stage}`,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       pointInTimeRecovery: true,
