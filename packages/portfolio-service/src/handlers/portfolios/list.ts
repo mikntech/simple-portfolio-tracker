@@ -11,13 +11,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const userId = event.queryStringParameters?.userId;
 
     if (!userId) {
-      return createApiResponse(400, {
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'User ID is required',
+      return createApiResponse(
+        400,
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'User ID is required',
+          },
         },
-      });
+        event
+      );
     }
 
     // Query portfolios by user ID
@@ -32,18 +36,26 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })
     );
 
-    return createApiResponse(200, {
-      success: true,
-      data: result.Items || [],
-    });
+    return createApiResponse(
+      200,
+      {
+        success: true,
+        data: result.Items || [],
+      },
+      event
+    );
   } catch (error) {
     console.error('Error listing portfolios:', error);
-    return createApiResponse(500, {
-      success: false,
-      error: {
-        code: 'LIST_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to list portfolios',
+    return createApiResponse(
+      500,
+      {
+        success: false,
+        error: {
+          code: 'LIST_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to list portfolios',
+        },
       },
-    });
+      event
+    );
   }
 };

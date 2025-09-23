@@ -26,13 +26,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
 
     if (existingUser.Items && existingUser.Items.length > 0) {
-      return createApiResponse(409, {
-        success: false,
-        error: {
-          code: 'EMAIL_EXISTS',
-          message: 'User with this email already exists',
+      return createApiResponse(
+        409,
+        {
+          success: false,
+          error: {
+            code: 'EMAIL_EXISTS',
+            message: 'User with this email already exists',
+          },
         },
-      });
+        event
+      );
     }
 
     const user = {
@@ -65,22 +69,30 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })
     );
 
-    return createApiResponse(201, {
-      success: true,
-      data: {
-        ...user,
-        createdAt: new Date(user.createdAt),
-        updatedAt: new Date(user.updatedAt),
+    return createApiResponse(
+      201,
+      {
+        success: true,
+        data: {
+          ...user,
+          createdAt: new Date(user.createdAt),
+          updatedAt: new Date(user.updatedAt),
+        },
       },
-    });
+      event
+    );
   } catch (error) {
     console.error('Error creating user:', error);
-    return createApiResponse(400, {
-      success: false,
-      error: {
-        code: 'CREATE_FAILED',
-        message: error instanceof Error ? error.message : 'Failed to create user',
+    return createApiResponse(
+      400,
+      {
+        success: false,
+        error: {
+          code: 'CREATE_FAILED',
+          message: error instanceof Error ? error.message : 'Failed to create user',
+        },
       },
-    });
+      event
+    );
   }
 };
