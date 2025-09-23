@@ -7,9 +7,9 @@
     "watch": "tsc -w",
     "cdk": "cdk",
     "bootstrap": "cdk bootstrap",
-    "deploy": "cdk deploy --all --require-approval never",
-    "deploy:dev": "cdk deploy --all --require-approval never -c stage=dev",
-    "deploy:prod": "cdk deploy --all --require-approval never -c stage=prod",
+    "deploy": "cdk deploy --all --require-approval never --outputs-file outputs.json",
+    "deploy:dev": "cdk deploy --all --require-approval never --outputs-file outputs.json -c stage=dev",
+    "deploy:prod": "cdk deploy --all --require-approval never --outputs-file outputs.json -c stage=prod",
     "diff": "cdk diff",
     "synth": "cdk synth",
     "test": "jest"

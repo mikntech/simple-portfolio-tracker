@@ -59,8 +59,8 @@ jobs:
         run: |
           # Deploy base infrastructure
           cd packages/base-infra
-          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} pnpm run cdk bootstrap || true
-          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} pnpm run cdk deploy -- --require-approval never --outputs-file outputs.json
+          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} pnpm run bootstrap || true
+          STAGE=dev DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} pnpm run deploy
           cd ../..
 
           # Deploy auth infrastructure
@@ -189,8 +189,8 @@ jobs:
         run: |
           # Deploy base infrastructure
           cd packages/base-infra
-          STAGE=prod DOMAIN_NAME=${{ secrets.PROD_DOMAIN_NAME }} pnpm run cdk bootstrap || true
-          STAGE=prod DOMAIN_NAME=${{ secrets.PROD_DOMAIN_NAME }} pnpm run cdk deploy -- --require-approval never --outputs-file outputs.json
+          STAGE=prod DOMAIN_NAME=${{ secrets.PROD_DOMAIN_NAME }} pnpm run bootstrap || true
+          STAGE=prod DOMAIN_NAME=${{ secrets.PROD_DOMAIN_NAME }} pnpm run deploy
           cd ../..
 
           # Deploy auth infrastructure
