@@ -138,7 +138,7 @@ export class PortfolioBackendStack extends cdk.Stack {
               "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-amz-user-agent'",
             'method.response.header.Access-Control-Allow-Methods':
               "'GET,POST,PUT,DELETE,OPTIONS,PATCH'",
-            'method.response.header.Access-Control-Allow-Origin': "'*'",
+            'method.response.header.Access-Control-Allow-Origin': `'${stage === 'dev' ? 'http://localhost:3000' : 'https://app.keeride.com'}'`,
             'method.response.header.Access-Control-Allow-Credentials': "'true'",
             'method.response.header.Access-Control-Max-Age': "'86400'",
           },
