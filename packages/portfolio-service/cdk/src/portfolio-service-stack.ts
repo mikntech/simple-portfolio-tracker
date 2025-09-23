@@ -127,13 +127,39 @@ export class PortfolioServiceStack extends cdk.Stack {
       },
     };
 
-    const optionsHandler = new NodejsFunction(this, 'OptionsHandler', {
-      ...functionDefaults,
-      entry: path.join(__dirname, `../../src/handlers/${stage}options.ts`),
-      functionName: `pt2-options-${stage}`,
-      memorySize: 128,
-      timeout: cdk.Duration.seconds(10),
+    // Create a reusable OPTIONS method configuration for CORS
+    const optionsIntegration = new apigateway.MockIntegration({
+      integrationResponses: [
+        {
+          statusCode: '200',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Headers':
+              "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+            'method.response.header.Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
+            'method.response.header.Access-Control-Allow-Origin': "'*'",
+            'method.response.header.Access-Control-Allow-Credentials': "'true'",
+          },
+        },
+      ],
+      passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
+      requestTemplates: {
+        'application/json': '{"statusCode": 200}',
+      },
     });
+
+    const optionsMethodResponse = {
+      methodResponses: [
+        {
+          statusCode: '200',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Headers': true,
+            'method.response.header.Access-Control-Allow-Methods': true,
+            'method.response.header.Access-Control-Allow-Origin': true,
+            'method.response.header.Access-Control-Allow-Credentials': true,
+          },
+        },
+      ],
+    };
 
     const userHandlers = {
       create: new NodejsFunction(this, 'CreateUserFunction', {
@@ -325,80 +351,12 @@ export class PortfolioServiceStack extends cdk.Stack {
     const userById = users.addResource('{id}');
 
     users.addMethod('POST', new apigateway.LambdaIntegration(userHandlers.create));
-    users.addMethod(
-      'OPTIONS',
-      new apigateway.MockIntegration({
-        integrationResponses: [
-          {
-            statusCode: '200',
-            responseParameters: {
-              'method.response.header.Access-Control-Allow-Headers':
-                "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-              'method.response.header.Access-Control-Allow-Methods':
-                "'GET,POST,PUT,DELETE,OPTIONS'",
-              'method.response.header.Access-Control-Allow-Origin': "'*'",
-              'method.response.header.Access-Control-Allow-Credentials': "'true'",
-            },
-          },
-        ],
-        passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
-        requestTemplates: {
-          'application/json': '{"statusCode": 200}',
-        },
-      }),
-      {
-        methodResponses: [
-          {
-            statusCode: '200',
-            responseParameters: {
-              'method.response.header.Access-Control-Allow-Headers': true,
-              'method.response.header.Access-Control-Allow-Methods': true,
-              'method.response.header.Access-Control-Allow-Origin': true,
-              'method.response.header.Access-Control-Allow-Credentials': true,
-            },
-          },
-        ],
-      }
-    );
+    users.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     userById.addMethod('GET', new apigateway.LambdaIntegration(userHandlers.get));
     userById.addMethod('PUT', new apigateway.LambdaIntegration(userHandlers.update));
     userById.addMethod('DELETE', new apigateway.LambdaIntegration(userHandlers.delete));
-    userById.addMethod(
-      'OPTIONS',
-      new apigateway.MockIntegration({
-        integrationResponses: [
-          {
-            statusCode: '200',
-            responseParameters: {
-              'method.response.header.Access-Control-Allow-Headers':
-                "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-              'method.response.header.Access-Control-Allow-Methods':
-                "'GET,POST,PUT,DELETE,OPTIONS'",
-              'method.response.header.Access-Control-Allow-Origin': "'*'",
-              'method.response.header.Access-Control-Allow-Credentials': "'true'",
-            },
-          },
-        ],
-        passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
-        requestTemplates: {
-          'application/json': '{"statusCode": 200}',
-        },
-      }),
-      {
-        methodResponses: [
-          {
-            statusCode: '200',
-            responseParameters: {
-              'method.response.header.Access-Control-Allow-Headers': true,
-              'method.response.header.Access-Control-Allow-Methods': true,
-              'method.response.header.Access-Control-Allow-Origin': true,
-              'method.response.header.Access-Control-Allow-Credentials': true,
-            },
-          },
-        ],
-      }
-    );
+    userById.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     const portfolios = apiV1.addResource('portfolios');
     const portfolioById = portfolios.addResource('{id}');
@@ -408,27 +366,27 @@ export class PortfolioServiceStack extends cdk.Stack {
 
     portfolios.addMethod('POST', new apigateway.LambdaIntegration(portfolioHandlers.create));
     portfolios.addMethod('GET', new apigateway.LambdaIntegration(portfolioHandlers.list));
-    portfolios.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    portfolios.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
     portfolioById.addMethod('GET', new apigateway.LambdaIntegration(portfolioHandlers.get));
     portfolioById.addMethod('PUT', new apigateway.LambdaIntegration(portfolioHandlers.update));
     portfolioById.addMethod('DELETE', new apigateway.LambdaIntegration(portfolioHandlers.delete));
-    portfolioById.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    portfolioById.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     portfolioSummary.addMethod('GET', new apigateway.LambdaIntegration(portfolioHandlers.summary));
-    portfolioSummary.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    portfolioSummary.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     portfolioHoldings.addMethod('GET', new apigateway.LambdaIntegration(holdingHandlers.list));
-    portfolioHoldings.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    portfolioHoldings.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     holdingByAssetId.addMethod('GET', new apigateway.LambdaIntegration(holdingHandlers.get));
-    holdingByAssetId.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    holdingByAssetId.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     const transactions = apiV1.addResource('transactions');
     const transactionById = transactions.addResource('{id}');
 
     transactions.addMethod('POST', new apigateway.LambdaIntegration(transactionHandlers.create));
     transactions.addMethod('GET', new apigateway.LambdaIntegration(transactionHandlers.list));
-    transactions.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    transactions.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     transactionById.addMethod('GET', new apigateway.LambdaIntegration(transactionHandlers.get));
     transactionById.addMethod('PUT', new apigateway.LambdaIntegration(transactionHandlers.update));
@@ -436,7 +394,7 @@ export class PortfolioServiceStack extends cdk.Stack {
       'DELETE',
       new apigateway.LambdaIntegration(transactionHandlers.delete)
     );
-    transactionById.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    transactionById.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     const assets = apiV1.addResource('assets');
     const assetSearch = assets.addResource('search');
@@ -445,13 +403,13 @@ export class PortfolioServiceStack extends cdk.Stack {
     const assetBySymbol = assetSymbol.addResource('{symbol}');
 
     assetSearch.addMethod('GET', new apigateway.LambdaIntegration(assetHandlers.search));
-    assetSearch.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    assetSearch.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     assetById.addMethod('GET', new apigateway.LambdaIntegration(assetHandlers.get));
-    assetById.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    assetById.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     assetBySymbol.addMethod('GET', new apigateway.LambdaIntegration(assetHandlers.getBySymbol));
-    assetBySymbol.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    assetBySymbol.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     const allocations = apiV1.addResource('allocations');
     const allocationById = allocations.addResource('{id}');
@@ -459,25 +417,22 @@ export class PortfolioServiceStack extends cdk.Stack {
     const portfolioAllocationSummary = portfolioById.addResource('allocation-summary');
 
     allocations.addMethod('POST', new apigateway.LambdaIntegration(allocationHandlers.create));
-    allocations.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    allocations.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
     allocationById.addMethod('PUT', new apigateway.LambdaIntegration(allocationHandlers.update));
     allocationById.addMethod('DELETE', new apigateway.LambdaIntegration(allocationHandlers.delete));
-    allocationById.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    allocationById.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     portfolioAllocations.addMethod(
       'GET',
       new apigateway.LambdaIntegration(allocationHandlers.list)
     );
-    portfolioAllocations.addMethod('OPTIONS', new apigateway.LambdaIntegration(optionsHandler));
+    portfolioAllocations.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     portfolioAllocationSummary.addMethod(
       'GET',
       new apigateway.LambdaIntegration(allocationHandlers.summary)
     );
-    portfolioAllocationSummary.addMethod(
-      'OPTIONS',
-      new apigateway.LambdaIntegration(optionsHandler)
-    );
+    portfolioAllocationSummary.addMethod('OPTIONS', optionsIntegration, optionsMethodResponse);
 
     new cdk.CfnOutput(this, 'UsersTableName', {
       value: usersTable.tableName,
