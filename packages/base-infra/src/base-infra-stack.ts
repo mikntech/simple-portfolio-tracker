@@ -47,6 +47,24 @@ export class BaseInfraStack extends cdk.Stack {
         loggingLevel: apigateway.MethodLoggingLevel.INFO,
         metricsEnabled: true,
       },
+      defaultCorsPreflightOptions: {
+        allowOrigins: [
+          'https://app.keeride.com',
+          'https://devapp.keeride.com',
+          'http://localhost:5173',
+          'http://localhost:3000',
+          'http://localhost:3001',
+        ],
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: [
+          'Content-Type',
+          'X-Amz-Date',
+          'Authorization',
+          'X-Api-Key',
+          'X-Amz-Security-Token',
+        ],
+        allowCredentials: true,
+      },
     });
 
     this.apiGateway.root.addMethod(
