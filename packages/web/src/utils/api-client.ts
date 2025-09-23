@@ -65,6 +65,7 @@ class ApiClient {
       method,
       headers,
       body: options?.body ? JSON.stringify(options.body) : undefined,
+      credentials: 'include', // Add this line
     });
 
     const data = await response.json();
