@@ -130,7 +130,7 @@ export class PortfolioServiceStack extends cdk.Stack {
     const optionsHandler = new NodejsFunction(this, 'OptionsHandler', {
       ...functionDefaults,
       entry: path.join(__dirname, '../../src/handlers/options.ts'),
-      functionName: `portfolio-tracker-options-${stage}`,
+      functionName: `pt2-options-${stage}`,
       memorySize: 128,
       timeout: cdk.Duration.seconds(10),
     });
@@ -139,22 +139,22 @@ export class PortfolioServiceStack extends cdk.Stack {
       create: new NodejsFunction(this, 'CreateUserFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/users/create.ts'),
-        functionName: `portfolio-tracker-create-user-${stage}`,
+        functionName: `pt2-create-user-${stage}`,
       }),
       get: new NodejsFunction(this, 'GetUserFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/users/get.ts'),
-        functionName: `portfolio-tracker-get-user-${stage}`,
+        functionName: `pt2-get-user-${stage}`,
       }),
       update: new NodejsFunction(this, 'UpdateUserFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/users/update.ts'),
-        functionName: `portfolio-tracker-update-user-${stage}`,
+        functionName: `pt2-update-user-${stage}`,
       }),
       delete: new NodejsFunction(this, 'DeleteUserFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/users/delete.ts'),
-        functionName: `portfolio-tracker-delete-user-${stage}`,
+        functionName: `pt2-delete-user-${stage}`,
       }),
     };
 
@@ -162,32 +162,32 @@ export class PortfolioServiceStack extends cdk.Stack {
       create: new NodejsFunction(this, 'CreatePortfolioFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/portfolios/create.ts'),
-        functionName: `portfolio-tracker-create-portfolio-${stage}`,
+        functionName: `pt2-create-portfolio-${stage}`,
       }),
       get: new NodejsFunction(this, 'GetPortfolioFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/portfolios/get.ts'),
-        functionName: `portfolio-tracker-get-portfolio-${stage}`,
+        functionName: `pt2-get-portfolio-${stage}`,
       }),
       list: new NodejsFunction(this, 'ListPortfoliosFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/portfolios/list.ts'),
-        functionName: `portfolio-tracker-list-portfolios-${stage}`,
+        functionName: `pt2-list-portfolios-${stage}`,
       }),
       update: new NodejsFunction(this, 'UpdatePortfolioFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/portfolios/update.ts'),
-        functionName: `portfolio-tracker-update-portfolio-${stage}`,
+        functionName: `pt2-update-portfolio-${stage}`,
       }),
       delete: new NodejsFunction(this, 'DeletePortfolioFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/portfolios/delete.ts'),
-        functionName: `portfolio-tracker-delete-portfolio-${stage}`,
+        functionName: `pt2-delete-portfolio-${stage}`,
       }),
       summary: new NodejsFunction(this, 'PortfolioSummaryFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/portfolios/summary.ts'),
-        functionName: `portfolio-tracker-portfolio-summary-${stage}`,
+        functionName: `pt2-portfolio-summary-${stage}`,
         timeout: cdk.Duration.minutes(1),
       }),
     };
@@ -196,27 +196,27 @@ export class PortfolioServiceStack extends cdk.Stack {
       create: new NodejsFunction(this, 'CreateTransactionFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/transactions/create.ts'),
-        functionName: `portfolio-tracker-create-transaction-${stage}`,
+        functionName: `pt2-create-transaction-${stage}`,
       }),
       get: new NodejsFunction(this, 'GetTransactionFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/transactions/get.ts'),
-        functionName: `portfolio-tracker-get-transaction-${stage}`,
+        functionName: `pt2-get-transaction-${stage}`,
       }),
       list: new NodejsFunction(this, 'ListTransactionsFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/transactions/list.ts'),
-        functionName: `portfolio-tracker-list-transactions-${stage}`,
+        functionName: `pt2-list-transactions-${stage}`,
       }),
       update: new NodejsFunction(this, 'UpdateTransactionFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/transactions/update.ts'),
-        functionName: `portfolio-tracker-update-transaction-${stage}`,
+        functionName: `pt2-update-transaction-${stage}`,
       }),
       delete: new NodejsFunction(this, 'DeleteTransactionFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/transactions/delete.ts'),
-        functionName: `portfolio-tracker-delete-transaction-${stage}`,
+        functionName: `pt2-delete-transaction-${stage}`,
       }),
     };
 
@@ -224,17 +224,17 @@ export class PortfolioServiceStack extends cdk.Stack {
       search: new NodejsFunction(this, 'SearchAssetsFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/assets/search.ts'),
-        functionName: `portfolio-tracker-search-assets-${stage}`,
+        functionName: `pt2-search-assets-${stage}`,
       }),
       get: new NodejsFunction(this, 'GetAssetFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/assets/get.ts'),
-        functionName: `portfolio-tracker-get-asset-${stage}`,
+        functionName: `pt2-get-asset-${stage}`,
       }),
       getBySymbol: new NodejsFunction(this, 'GetAssetBySymbolFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/assets/get-by-symbol.ts'),
-        functionName: `portfolio-tracker-get-asset-by-symbol-${stage}`,
+        functionName: `pt2-get-asset-by-symbol-${stage}`,
       }),
     };
 
@@ -242,12 +242,12 @@ export class PortfolioServiceStack extends cdk.Stack {
       list: new NodejsFunction(this, 'ListHoldingsFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/holdings/list.ts'),
-        functionName: `portfolio-tracker-list-holdings-${stage}`,
+        functionName: `pt2-list-holdings-${stage}`,
       }),
       get: new NodejsFunction(this, 'GetHoldingFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/holdings/get.ts'),
-        functionName: `portfolio-tracker-get-holding-${stage}`,
+        functionName: `pt2-get-holding-${stage}`,
       }),
     };
 
@@ -255,27 +255,27 @@ export class PortfolioServiceStack extends cdk.Stack {
       create: new NodejsFunction(this, 'CreateAllocationFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/allocations/create.ts'),
-        functionName: `portfolio-tracker-create-allocation-${stage}`,
+        functionName: `pt2-create-allocation-${stage}`,
       }),
       list: new NodejsFunction(this, 'ListAllocationsFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/allocations/list.ts'),
-        functionName: `portfolio-tracker-list-allocations-${stage}`,
+        functionName: `pt2-list-allocations-${stage}`,
       }),
       update: new NodejsFunction(this, 'UpdateAllocationFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/allocations/update.ts'),
-        functionName: `portfolio-tracker-update-allocation-${stage}`,
+        functionName: `pt2-update-allocation-${stage}`,
       }),
       delete: new NodejsFunction(this, 'DeleteAllocationFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/allocations/delete.ts'),
-        functionName: `portfolio-tracker-delete-allocation-${stage}`,
+        functionName: `pt2-delete-allocation-${stage}`,
       }),
       summary: new NodejsFunction(this, 'GetAllocationSummaryFunction', {
         ...functionDefaults,
         entry: path.join(__dirname, '../../src/handlers/allocations/summary.ts'),
-        functionName: `portfolio-tracker-allocation-summary-${stage}`,
+        functionName: `pt2-allocation-summary-${stage}`,
       }),
     };
 
