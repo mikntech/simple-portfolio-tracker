@@ -7,12 +7,12 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import * as path from 'path';
 
-export interface PortfolioServiceStackProps extends cdk.StackProps {
+export interface PortfolioBackendStackProps extends cdk.StackProps {
   stage: string;
 }
 
-export class PortfolioServiceStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props: PortfolioServiceStackProps) {
+export class PortfolioBackendStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props: PortfolioBackendStackProps) {
     super(scope, id, props);
 
     const { stage } = props;
