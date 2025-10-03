@@ -9,12 +9,14 @@ const getEnvFromGACIC = ({
   name,
   camelCase,
   UPPER_CASE,
+  default: defaultValue,
 }: {
   name: string;
   camelCase: string;
   UPPER_CASE: string;
+  default?: string;
 }) => {
-  const rawValue = app.node.tryGetContext(camelCase) || process.env[UPPER_CASE];
+  const rawValue = app.node.tryGetContext(camelCase) || process.env[UPPER_CASE] || defaultValue;
   const value = rawValue?.trim();
 
   if (!value || value === '') {
@@ -31,8 +33,14 @@ const domainName = getEnvFromGACIC({
   name: 'domain name',
   camelCase: 'domainName',
   UPPER_CASE: 'DOMAIN_NAME',
+  default: 'keeride.com',
 });
-const stage = getEnvFromGACIC({ name: 'stage', camelCase: 'stage', UPPER_CASE: 'STAGE' });
+const stage = getEnvFromGACIC({
+  name: 'stage',
+  camelCase: 'stage',
+  UPPER_CASE: 'STAGE',
+  default: 'prod',
+});
 
 new BaseInfraStack(app, `PortfolioBaseInfraStack-${stage}`, {
   domainName,
