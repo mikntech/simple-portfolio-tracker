@@ -16,6 +16,7 @@ out/
 cdk.out/
 .cdk.staging/
 cdk.context.json
+outputs.json
 
 # Environment variables
 .env
