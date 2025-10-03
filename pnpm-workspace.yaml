@@ -1,3 +1,7 @@
 packages:
-  - 'packages/*'
-  - 'packages/portfolio-service/cdk'
+  - packages/*
+  - packages/portfolio-service/cdk
+
+onlyBuiltDependencies:
+  - esbuild
+  - nx
